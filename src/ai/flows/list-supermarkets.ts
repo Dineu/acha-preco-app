@@ -9,22 +9,15 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { findSupermarketsTool } from '../tools/findSupermarkets';
+import { findSupermarketsTool, FindSupermarketsInputSchema, FindSupermarketsOutputSchema } from '../tools/findSupermarkets';
 
-export const ListSupermarketsInputSchema = z.object({
-  city: z.string().describe('The city to search for supermarkets in.'),
-});
-export type ListSupermarketsInput = z.infer<typeof ListSupermarketsInputSchema>;
-
-export const ListSupermarketsOutputSchema = z.object({
-  supermarkets: z.array(z.string()).describe('A list of supermarket names.'),
-});
-export type ListSupermarketsOutput = z.infer<typeof ListSupermarketsOutputSchema>;
+export type ListSupermarketsInput = z.infer<typeof FindSupermarketsInputSchema>;
+export type ListSupermarketsOutput = z.infer<typeof FindSupermarketsOutputSchema>;
 
 const prompt = ai.definePrompt({
   name: 'listSupermarketsPrompt',
-  input: { schema: ListSupermarketsInputSchema },
-  output: { schema: ListSupermarketsOutputSchema },
+  input: { schema: FindSupermarketsInputSchema },
+  output: { schema: FindSupermarketsOutputSchema },
   tools: [findSupermarketsTool],
   prompt: `You are a helpful assistant. Use the findSupermarkets tool to list all supermarkets in the given city: {{city}}. Then, output the list of supermarkets you found.`,
 });
@@ -32,8 +25,8 @@ const prompt = ai.definePrompt({
 const listSupermarketsFlow = ai.defineFlow(
   {
     name: 'listSupermarketsFlow',
-    inputSchema: ListSupermarketsInputSchema,
-    outputSchema: ListSupermarketsOutputSchema,
+    inputSchema: FindSupermarketsInputSchema,
+    outputSchema: FindSupermarketsOutputSchema,
   },
   async (input) => {
     const { output } = await prompt(input);

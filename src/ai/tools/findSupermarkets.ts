@@ -8,16 +8,21 @@ import { ai } from '@/ai/genkit';
 import { searchNearby } from '@/services/google-maps';
 import { z } from 'zod';
 
+export const FindSupermarketsInputSchema = z.object({
+  city: z.string().describe('The city to search for supermarkets in.'),
+});
+
+export const FindSupermarketsOutputSchema = z.object({
+  supermarkets: z.array(z.string()).describe('A list of supermarket names.'),
+});
+
+
 export const findSupermarketsTool = ai.defineTool(
   {
     name: 'findSupermarkets',
     description: 'Finds supermarkets in a given city, including major chains.',
-    inputSchema: z.object({
-      city: z.string().describe('The city to search for supermarkets in.'),
-    }),
-    outputSchema: z.object({
-      supermarkets: z.array(z.string()).describe('A list of supermarket names.'),
-    }),
+    inputSchema: FindSupermarketsInputSchema,
+    outputSchema: FindSupermarketsOutputSchema,
   },
   async (input) => {
     console.log(`Searching for supermarkets in ${input.city}`);
