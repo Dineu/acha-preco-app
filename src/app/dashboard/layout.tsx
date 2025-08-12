@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, Map, Package, PanelLeft, PlusCircle } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Home, Map, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -30,7 +30,6 @@ import { UserNav } from '@/components/user-nav';
 import { Logo } from '@/components/logo';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
 
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
