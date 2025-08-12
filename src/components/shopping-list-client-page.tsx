@@ -19,6 +19,12 @@ import { suggestMissingItems, suggestAlternateStores, extractPromotionDetails } 
 import type { ExtractPromotionDetailsOutput } from '@/ai/flows/extract-promotion-details';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Set up the worker for pdfjs
+if (typeof window !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+}
 
 
 export default function ShoppingListClientPage({ initialList }: { initialList: ShoppingList }) {
@@ -108,39 +114,74 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
   const handleUploadButtonClick = () => {
     fileInputRef.current?.click();
   };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const photoDataUri = e.target?.result as string;
-          setIsExtractingPromotion(true);
-          setExtractedPromotion(null);
-          try {
-            const result = await extractPromotionDetails({ photoDataUri });
-            setExtractedPromotion(result);
-            setIsPromotionDialogOpen(true);
-          } catch (error) {
-            toast({
-              variant: "destructive",
-              title: "Erro na Extração",
-              description: "Não foi possível extrair detalhes da promoção da imagem.",
-            });
-            console.error("Extraction error:", error);
-          } finally {
-            setIsExtractingPromotion(false);
-          }
-        };
-        reader.readAsDataURL(file);
-      } else if (file.type === 'application/pdf') {
-        toast({
-          title: "Funcionalidade em desenvolvimento",
-          description: "O upload de PDFs de ofertas ainda não está disponível. Por favor, envie uma imagem da promoção.",
-        });
-      }
+  
+  const processAndExtract = async (photoDataUri: string) => {
+    setIsExtractingPromotion(true);
+    setExtractedPromotion(null);
+    try {
+      const result = await extractPromotionDetails({ photoDataUri });
+      setExtractedPromotion(result);
+      setIsPromotionDialogOpen(true);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro na Extração",
+        description: "Não foi possível extrair detalhes da promoção do arquivo.",
+      });
+      console.error("Extraction error:", error);
+    } finally {
+      setIsExtractingPromotion(false);
     }
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        processAndExtract(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else if (file.type === 'application/pdf') {
+      try {
+        setIsExtractingPromotion(true);
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+        const page = await pdf.getPage(1); // Process only the first page
+        const viewport = page.getViewport({ scale: 1.5 });
+        
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        if (context) {
+          await page.render({ canvasContext: context, viewport: viewport }).promise;
+          const dataUri = canvas.toDataURL('image/jpeg');
+          processAndExtract(dataUri);
+        } else {
+            throw new Error('Could not get canvas context');
+        }
+
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao processar PDF",
+          description: "Não foi possível converter o PDF para imagem. O arquivo pode estar corrompido.",
+        });
+        console.error("PDF processing error:", error);
+        setIsExtractingPromotion(false);
+      }
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Tipo de arquivo não suportado",
+            description: "Por favor, envie um arquivo de imagem (JPG, PNG) ou PDF.",
+        });
+    }
+
     // Reset file input to allow uploading the same file again
     event.target.value = '';
   };
@@ -285,7 +326,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                 ) : (
                   <Upload className="mr-2 h-4 w-4" />
                 )}
-                Carregar foto da oferta
+                Carregar foto ou PDF
             </Button>
           </CardContent>
         </Card>
