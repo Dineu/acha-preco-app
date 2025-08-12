@@ -242,7 +242,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
               ) : (
                 <Store className="mr-2 h-4 w-4" />
               )}
-              Encontrar mercados mais baratos
+              Melhor preço
             </Button>
 
             {alternateStores && (
