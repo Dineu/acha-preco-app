@@ -5,6 +5,17 @@ import { usePathname } from 'next/navigation';
 import { Home, Map, Package, PanelLeft, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
   SidebarProvider,
   Sidebar,
   SidebarHeader,
@@ -57,12 +68,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <SidebarTrigger className="sm:hidden" />
           <div className="flex flex-1 items-center justify-end gap-2">
-            <Button size="sm" className="h-8 gap-1">
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Nova Lista
-              </span>
-            </Button>
+             <Dialog>
+              <DialogTrigger asChild>
+                <Button size="sm" className="h-8 gap-1">
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Nova Lista
+                  </span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Criar Nova Lista</DialogTitle>
+                  <DialogDescription>
+                    Dê um nome para sua nova lista de compras. Você poderá adicionar itens a seguir.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right">
+                      Nome
+                    </Label>
+                    <Input id="name" defaultValue="Compras da Semana" className="col-span-3" />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit">Criar Lista</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <UserNav />
           </div>
         </header>
