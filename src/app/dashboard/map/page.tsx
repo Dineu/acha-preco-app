@@ -1,10 +1,11 @@
+
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, useMapsLibrary, InfoWindow } from '@vis.gl/react-google-maps';
+import { useEffect, useState } from 'react';
+import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal, Loader2, List, X } from 'lucide-react';
+import { Terminal, Loader2, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -130,17 +131,12 @@ function SupermarketMap({
               position={market.location} 
               title={market.name}
               onClick={() => onMarkerClick(market)}
-            />
-          ))}
-          {selectedMarket && (
-            <InfoWindow
-              position={selectedMarket.location}
-              onCloseClick={() => onMarkerClick(null)}
             >
-              <p className="font-semibold">{selectedMarket.name}</p>
-            </InfoWindow>
-          )}
-
+              <div className={selectedMarket?.id === market.id ? 'animate-pulse' : ''}>
+                <Pin />
+              </div>
+            </AdvancedMarker>
+          ))}
         </GoogleMap>
          {isLoading && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
@@ -191,6 +187,7 @@ function MapPageContent() {
     setIsListing(true);
     setError(null);
     setMarketList([]);
+    setSelectedMarket(null);
     
     const searchQuery = `"Atacadão" OR "Assaí Atacadista" OR "Roldão Atacadista" OR "Sonda Supermercados" OR "Supermercado Sumerbol" OR "Supermercados Pague Menos" OR "Supermercado GoodBom" OR "Supermercado Pão de Acucar" OR "Covabra Supermercados" OR "MonteKali Supermercado" em Indaiatuba`;
 
@@ -202,7 +199,7 @@ function MapPageContent() {
     
     try {
       // @ts-ignore
-      const { places: searchResults } = await google.maps.places.Place.searchByText(request);
+      const { places: searchResults } = await places.Place.searchByText(request);
       
       if (searchResults && searchResults.length > 0) {
         const uniquePlaces = new Map<string, any>();
@@ -213,7 +210,7 @@ function MapPageContent() {
         });
         
         const formattedMarkets = Array.from(uniquePlaces.values())
-            .map(place => {
+            .map((place: any) => {
                 if (place.id && place.displayName && place.location) {
                     return {
                         id: place.id,
@@ -267,6 +264,10 @@ function MapPageContent() {
       setIsListing(false);
     }
   };
+
+  const handleMarkerClick = (market: MarketLocation | null) => {
+    setSelectedMarket(market);
+  };
   
    return (
     <div className="relative">
@@ -275,7 +276,7 @@ function MapPageContent() {
         isLoading={isLoading}
         error={error}
         selectedMarket={selectedMarket}
-        onMarkerClick={setSelectedMarket}
+        onMarkerClick={handleMarkerClick}
       />
       <SupermarketControls
         isListing={isListing}
@@ -351,3 +352,5 @@ export default function MapPage() {
     </Card>
   );
 }
+
+    
