@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -185,7 +186,7 @@ function MapPageContent() {
 
     const request = {
       textQuery: searchQuery,
-      fields: ['id', 'displayName', 'location'],
+      fields: ['id', 'displayName', 'location', 'types'],
       locationBias: map.getCenter()!,
     };
     
@@ -195,7 +196,9 @@ function MapPageContent() {
       
       if (searchResults && searchResults.length > 0) {
         const uniquePlaces = new Map<string, any>();
-        searchResults.forEach((place: any) => {
+        searchResults
+          .filter((place: any) => place.types.includes('supermarket'))
+          .forEach((place: any) => {
             if (place.id) {
                 uniquePlaces.set(place.id, place);
             }
@@ -221,7 +224,7 @@ function MapPageContent() {
           setMarketList(formattedMarkets);
           setError(null);
         } else {
-           const errorMessage = 'Não foi possível encontrar supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.';
+           const errorMessage = 'Não foi possível encontrar supermercados com os critérios definidos. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.';
            setError(errorMessage);
            toast({
               variant: 'destructive',
@@ -259,6 +262,7 @@ function MapPageContent() {
     if (places && map) {
       handleListSupermarkets();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [places, map]); // Dependencies ensure this runs when map/places are loaded.
 
   const handleMarkerClick = (market: MarketLocation | null) => {
