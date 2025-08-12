@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,14 @@ export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+
+  // Redirect to dashboard immediately on mount to bypass login for development
+  useEffect(() => {
+    router.push('/dashboard');
+  }, [router]);
+  
+  // The original login logic is kept below but will not be used due to the redirect.
+  // This makes it easy to re-enable login later.
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,59 +68,10 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
-      <Card className="mx-auto w-full max-w-sm">
-        <CardHeader className="text-center">
-          <div className="mb-4 flex justify-center">
-            <Logo className="h-12 w-12" />
-          </div>
-          <CardTitle className="text-2xl font-headline">Acha Preço</CardTitle>
-          <CardDescription>Indaiatuba</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="seu@email.com" 
-                required 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading || isGoogleLoading}
-              />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Senha</Label>
-                <Link href="#" className="ml-auto inline-block text-sm underline">
-                  Esqueceu sua senha?
-                </Link>
-              </div>
-              <Input 
-                id="password" 
-                type="password" 
-                required 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading || isGoogleLoading}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
-              {isLoading ? <Loader2 className="animate-spin" /> : 'Entrar'}
-            </Button>
-            <Button variant="outline" className="w-full" type="button" onClick={handleGoogleLogin} disabled={isLoading || isGoogleLoading}>
-              {isGoogleLoading ? <Loader2 className="animate-spin" /> : 'Entrar com Google'}
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm">
-            Não tem uma conta?{' '}
-            <Link href="/signup" className="underline">
-              Cadastre-se
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+       <div className="text-center">
+        <Loader2 className="mx-auto h-12 w-12 animate-spin" />
+        <p className="mt-4 text-muted-foreground">Redirecionando para o painel...</p>
+      </div>
     </div>
   );
 }
