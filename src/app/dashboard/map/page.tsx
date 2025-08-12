@@ -173,74 +173,82 @@ function MapPageContent() {
 
   const handleListSupermarkets = async () => {
     if (!places || !map) {
-      // This will be retried by the useEffect hook once the map is ready.
       return;
     }
-    
+  
     console.log('[CLIENT] Buscando supermercados...');
     setIsLoading(true);
     setError(null);
-    
-    const request = {
-      textQuery: 'supermarket in Indaiatuba',
-      fields: ['id', 'displayName', 'location', 'types'],
-      locationBias: map.getCenter()!,
-    };
-    
+  
+    const supermarketQueries = [
+      "Sumerbol em Indaiatuba",
+      "Pague Menos em Indaiatuba",
+      "GoodBom em Indaiatuba",
+      "Covabra em Indaiatuba",
+      "Sonda em Indaiatuba",
+      "Atacadão em Indaiatuba",
+      "Assaí Atacadista em Indaiatuba",
+      "Roldão Atacadista em Indaiatuba",
+      "Pão de Açúcar em Indaiatuba",
+      "MonteKali Supermercado em Indaiatuba"
+    ];
+  
     try {
-      // @ts-ignore
-      const { places: searchResults } = await places.Place.searchByText(request);
+      const searchPromises = supermarketQueries.map(query => {
+        const request = {
+          textQuery: query,
+          fields: ['id', 'displayName', 'location', 'types'],
+          locationBias: map.getCenter()!,
+        };
+        // @ts-ignore
+        return places.Place.searchByText(request);
+      });
+  
+      const searchResults = await Promise.all(searchPromises);
       
-      if (searchResults && searchResults.length > 0) {
-        const uniquePlaces = new Map<string, any>();
-        
-        const validPlaces = searchResults.filter((place: any) => {
-            const displayName = place.displayName.toLowerCase();
-            const isSupermarketType = place.types.includes('supermarket') || place.types.includes('grocery_or_supermarket');
-            const isNotHardware = !place.types.includes('hardware_store');
-            const isNotGlass = !displayName.includes('vidraçaria');
-            return (isSupermarketType || isNotHardware) && isNotGlass;
-        });
-
-        validPlaces.forEach((place: any) => {
-            if (place.id && !uniquePlaces.has(place.displayName)) {
-                uniquePlaces.set(place.displayName, place);
+      const allPlaces = searchResults.flatMap(result => result.places);
+      const uniquePlaces = new Map<string, any>();
+  
+      allPlaces.forEach((place: any) => {
+        if (place.id && !uniquePlaces.has(place.id)) {
+            // Additional check to avoid non-supermarkets with similar names
+            const name = place.displayName.toLowerCase();
+            if (name.includes('vidraçaria')) {
+                return;
             }
-        });
-        
-        const formattedMarkets = Array.from(uniquePlaces.values())
-            .map((place: any) => {
-                if (place.id && place.displayName && place.location) {
-                    return {
-                        id: place.id,
-                        name: place.displayName,
-                        location: {
-                            lat: place.location.lat(),
-                            lng: place.location.lng(),
-                        },
-                    };
-                }
-                return null;
-            })
-            .filter((market): market is MarketLocation => market !== null)
-            .sort((a, b) => a.name.localeCompare(b.name));
-        
-        if (formattedMarkets.length > 0) {
-          setMarketList(formattedMarkets);
-          setError(null);
-        } else {
-           const errorMessage = 'Não foi possível encontrar supermercados com os critérios definidos. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.';
-           setError(errorMessage);
-           toast({
-              variant: 'destructive',
-              title: 'Nenhum resultado',
-              description: errorMessage,
-           });
+            uniquePlaces.set(place.id, place);
         }
+      });
+  
+      const formattedMarkets = Array.from(uniquePlaces.values())
+        .map((place: any) => {
+          if (place.id && place.displayName && place.location) {
+            return {
+              id: place.id,
+              name: place.displayName,
+              location: {
+                lat: place.location.lat(),
+                lng: place.location.lng(),
+              },
+            };
+          }
+          return null;
+        })
+        .filter((market): market is MarketLocation => market !== null)
+        .sort((a, b) => a.name.localeCompare(b.name));
+  
+      if (formattedMarkets.length > 0) {
+        setMarketList(formattedMarkets);
+        setError(null);
       } else {
-        setError('Não foram encontrados supermercados para a busca.');
+        const errorMessage = 'Não foi possível encontrar supermercados. Verifique se a API "Places API" está ativada e suas chaves de API estão corretas.';
+        setError(errorMessage);
+        toast({
+          variant: 'destructive',
+          title: 'Nenhum resultado',
+          description: errorMessage,
+        });
       }
-
     } catch (e) {
       let errorMessage = 'Não foi possível obter a lista de supermercados. Verifique o console para mais detalhes.';
       if (e instanceof Error) {
