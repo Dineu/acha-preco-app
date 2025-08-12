@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { ShoppingList, Item } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,8 +15,10 @@ import {
   Upload,
   Loader2,
 } from 'lucide-react';
-import { suggestMissingItems, suggestAlternateStores } from '@/lib/actions';
+import { suggestMissingItems, suggestAlternateStores, extractPromotionDetails } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
+
 
 export default function ShoppingListClientPage({ initialList }: { initialList: ShoppingList }) {
   const [list, setList] = useState(initialList);
@@ -25,6 +27,11 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
   const [alternateStores, setAlternateStores] = useState<{ stores: string[]; reasoning: string } | null>(null);
   const [isSuggestingItems, setIsSuggestingItems] = useState(false);
   const [isSuggestingStores, setIsSuggestingStores] = useState(false);
+  const [isExtractingPromotion, setIsExtractingPromotion] = useState(false);
+  const [extractedPromotion, setExtractedPromotion] = useState<{productName: string, price: number, store?: string} | null>(null)
+  const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
 
@@ -96,6 +103,40 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
       setIsSuggestingStores(false);
     }
   };
+
+  const handleUploadButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const photoDataUri = e.target?.result as string;
+        setIsExtractingPromotion(true);
+        setExtractedPromotion(null);
+        try {
+          const result = await extractPromotionDetails({ photoDataUri });
+          setExtractedPromotion(result);
+          setIsPromotionDialogOpen(true);
+        } catch (error) {
+           toast({
+            variant: "destructive",
+            title: "Erro na Extração",
+            description: "Não foi possível extrair detalhes da promoção da imagem.",
+          });
+          console.error("Extraction error:", error);
+        } finally {
+          setIsExtractingPromotion(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    // Reset file input to allow uploading the same file again
+    event.target.value = '';
+  };
+
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -218,12 +259,50 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
             </CardDescription>
           </CardHeader>
           <CardContent>
-             <Button variant="outline" className="w-full">
-                <Upload className="mr-2 h-4 w-4" />
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                onChange={handleFileChange}
+                accept="image/*"
+              />
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={handleUploadButtonClick}
+                disabled={isExtractingPromotion}
+              >
+                {isExtractingPromotion ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="mr-2 h-4 w-4" />
+                )}
                 Carregar foto da oferta
             </Button>
           </CardContent>
         </Card>
+        
+        <AlertDialog open={isPromotionDialogOpen} onOpenChange={setIsPromotionDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Promoção Extraída com Sucesso!</AlertDialogTitle>
+                <AlertDialogDescription>
+                    A IA analisou a imagem e encontrou os seguintes detalhes:
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              {extractedPromotion && (
+                <div className="text-sm">
+                  <p><strong>Produto:</strong> {extractedPromotion.productName}</p>
+                  <p><strong>Preço:</strong> R$ {extractedPromotion.price.toFixed(2)}</p>
+                  {extractedPromotion.store && <p><strong>Mercado:</strong> {extractedPromotion.store}</p>}
+                </div>
+              )}
+              <AlertDialogFooter>
+                <AlertDialogAction onClick={() => setIsPromotionDialogOpen(false)}>Ótimo!</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
       </div>
     </div>
   );

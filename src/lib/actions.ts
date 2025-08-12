@@ -10,6 +10,12 @@ import {
   SuggestAlternateStoresInput,
   SuggestAlternateStoresOutput,
 } from '@/ai/flows/suggest-alternate-stores';
+import {
+  extractPromotionDetails as extractPromotionDetailsFlow,
+  ExtractPromotionDetailsInput,
+  ExtractPromotionDetailsOutput,
+} from '@/ai/flows/extract-promotion-details';
+
 
 export async function suggestMissingItems(input: SuggestMissingItemsInput): Promise<SuggestMissingItemsOutput> {
   try {
@@ -28,5 +34,15 @@ export async function suggestAlternateStores(input: SuggestAlternateStoresInput)
   } catch (error) {
     console.error('Error suggesting alternate stores:', error);
     throw new Error('Failed to get store suggestions.');
+  }
+}
+
+export async function extractPromotionDetails(input: ExtractPromotionDetailsInput): Promise<ExtractPromotionDetailsOutput> {
+  try {
+    const result = await extractPromotionDetailsFlow(input);
+    return result;
+  } catch (error) {
+    console.error('Error extracting promotion details:', error);
+    throw new Error('Failed to extract promotion details.');
   }
 }
