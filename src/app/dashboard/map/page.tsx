@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
+import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, Pin, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2, List } from 'lucide-react';
