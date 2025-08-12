@@ -3,6 +3,8 @@
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { mockMarkets } from '@/lib/data';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Terminal } from 'lucide-react';
 
 export default function MapPage() {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -16,15 +18,20 @@ export default function MapPage() {
           <CardDescription>Localize os principais mercados e suas promoções.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center p-8 bg-muted rounded-md">
-            <p className="text-lg font-semibold">API Key do Google Maps não configurada.</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Para exibir o mapa, por favor, adicione sua chave de API do Google Maps no arquivo `.env.local`.
-            </p>
-            <code className="mt-4 inline-block bg-background px-2 py-1 rounded text-sm">
-              NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="SUA_CHAVE_AQUI"
-            </code>
-          </div>
+          <Alert variant="destructive">
+            <Terminal className="h-4 w-4" />
+            <AlertTitle>API Key não configurada</AlertTitle>
+            <AlertDescription>
+              <p className="mb-2">Para exibir o mapa, sua chave de API do Google Maps precisa ser adicionada.</p>
+              <p>Por favor, adicione a seguinte linha ao seu arquivo <code>.env</code>:</p>
+              <code className="mt-2 relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
+                NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="SUA_CHAVE_AQUI"
+              </code>
+               <p className="mt-4 text-xs text-muted-foreground">
+                Se o erro persistir após adicionar a chave, certifique-se de que a URL do seu site (visível na barra de endereço do navegador) está autorizada nas restrições da chave de API no Google Cloud Console.
+              </p>
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     );

@@ -28,14 +28,40 @@ import {
 } from '@/components/ui/sidebar';
 import { UserNav } from '@/components/user-nav';
 import { Logo } from '@/components/logo';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [isNewListDialogOpen, setIsNewListDialogOpen] = useState(false);
+  const [newListName, setNewListName] = useState('Compras da Semana');
+  const { toast } = useToast();
+  const router = useRouter();
+
 
   const menuItems = [
     { href: '/dashboard', label: 'Minhas Listas', icon: Home },
     { href: '/dashboard/map', label: 'Mapa de Mercados', icon: Map },
   ];
+
+  const handleCreateList = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would typically call an API to create the list
+    console.log('Creating new list:', newListName);
+
+    toast({
+      title: 'Lista Criada!',
+      description: `A lista "${newListName}" foi criada com sucesso.`,
+    });
+
+    // We can simulate navigating to the new list in the future
+    // For now, just close the dialog and refresh the dashboard
+    setIsNewListDialogOpen(false);
+    // router.push('/dashboard'); // Or navigate to the new list page
+  };
+
 
   return (
     <SidebarProvider>
@@ -68,7 +94,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <SidebarTrigger className="sm:hidden" />
           <div className="flex flex-1 items-center justify-end gap-2">
-             <Dialog>
+             <Dialog open={isNewListDialogOpen} onOpenChange={setIsNewListDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" className="h-8 gap-1">
                   <PlusCircle className="h-3.5 w-3.5" />
@@ -78,23 +104,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Criar Nova Lista</DialogTitle>
-                  <DialogDescription>
-                    Dê um nome para sua nova lista de compras. Você poderá adicionar itens a seguir.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="name" className="text-right">
-                      Nome
-                    </Label>
-                    <Input id="name" defaultValue="Compras da Semana" className="col-span-3" />
+                <form onSubmit={handleCreateList}>
+                  <DialogHeader>
+                    <DialogTitle>Criar Nova Lista</DialogTitle>
+                    <DialogDescription>
+                      Dê um nome para sua nova lista de compras. Você poderá adicionar itens a seguir.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="name" className="text-right">
+                        Nome
+                      </Label>
+                      <Input 
+                        id="name" 
+                        value={newListName}
+                        onChange={(e) => setNewListName(e.target.value)}
+                        className="col-span-3"
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit">Criar Lista</Button>
-                </DialogFooter>
+                  <DialogFooter>
+                    <Button type="submit">Criar Lista</Button>
+                  </DialogFooter>
+                </form>
               </DialogContent>
             </Dialog>
             <UserNav />
