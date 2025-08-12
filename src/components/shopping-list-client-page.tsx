@@ -294,13 +294,14 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
               </AlertDialogHeader>
               {extractedPromotion && (
                 <div className="max-h-60 overflow-y-auto text-sm space-y-2 border-t pt-4 mt-2">
-                  {extractedPromotion.promotions.map((promo, index) => (
-                    <div key={index} className="p-2 bg-muted rounded-md">
-                        <p><strong>Produto:</strong> {promo.productName}</p>
-                        <p><strong>Preço:</strong> R$ {promo.price.toFixed(2)}</p>
-                    </div>
-                  ))}
-                  {extractedPromotion.promotions.length === 0 && (
+                  {Array.isArray(extractedPromotion.promotions) && extractedPromotion.promotions.length > 0 ? (
+                    extractedPromotion.promotions.map((promo, index) => (
+                      <div key={index} className="p-2 bg-muted rounded-md">
+                          <p><strong>Produto:</strong> {promo.productName}</p>
+                          <p><strong>Preço:</strong> R$ {promo.price.toFixed(2)}</p>
+                      </div>
+                    ))
+                  ) : (
                     <p className="text-muted-foreground">Nenhuma promoção clara foi encontrada na imagem.</p>
                   )}
                 </div>
