@@ -182,7 +182,13 @@ function MapPageContent() {
     setIsLoading(true);
     setError(null);
     
-    const searchQuery = `"Atacadão" OR "Assaí Atacadista" OR "Roldão Atacadista" OR "Sonda Supermercados" OR "Supermercado Sumerbol" OR "Supermercados Pague Menos" OR "Supermercado GoodBom" OR "Supermercado Pão de Acucar" OR "Covabra Supermercados" OR "MonteKali Supermercado" em Indaiatuba`;
+    const supermarketNames = [
+        "Atacadão", "Assaí Atacadista", "Roldão Atacadista", "Sonda Supermercados", 
+        "Supermercado Sumerbol", "Supermercados Pague Menos", "Supermercado GoodBom", 
+        "Supermercado Pão de Acucar", "Covabra Supermercados", "MonteKali Supermercado"
+    ];
+    const searchQuery = `${supermarketNames.join('" OR "')} em Indaiatuba`;
+
 
     const request = {
       textQuery: searchQuery,
@@ -196,9 +202,15 @@ function MapPageContent() {
       
       if (searchResults && searchResults.length > 0) {
         const uniquePlaces = new Map<string, any>();
-        searchResults
-          .filter((place: any) => place.types.includes('supermarket'))
-          .forEach((place: any) => {
+        
+        const validPlaces = searchResults.filter((place: any) => {
+            // A place is valid if it's a supermarket OR its name is one of the known supermarkets.
+            // This prevents "Vidraçaria Atacadão" while keeping "Assaí Atacadista" even if its type isn't 'supermarket'.
+            const isKnownName = supermarketNames.some(name => place.displayName.includes(name));
+            return place.types.includes('supermarket') || isKnownName;
+        });
+
+        validPlaces.forEach((place: any) => {
             if (place.id) {
                 uniquePlaces.set(place.id, place);
             }
