@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { APIProvider, Map, useMap, Marker } from '@vis.gl/react-google-maps';
+import { APIProvider, Map as GoogleMap, useMap, Marker } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2 } from 'lucide-react';
@@ -87,7 +87,7 @@ function SupermarketMap() {
 
   return (
      <div className="h-[600px] w-full rounded-lg overflow-hidden border relative">
-        <Map
+        <GoogleMap
           defaultCenter={{ lat: -23.089, lng: -47.218 }} // Indaiatuba
           defaultZoom={13}
           mapId="acha-preco-map"
@@ -97,7 +97,7 @@ function SupermarketMap() {
           {markets.map((market) => (
             <Marker key={market.id} position={market.location} title={market.name} />
           ))}
-        </Map>
+        </GoogleMap>
          {isLoading && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
