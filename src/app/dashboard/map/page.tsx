@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -29,33 +28,27 @@ type MarketLocation = {
   };
 };
 
-function SupermarketControls() {
-  const { toast } = useToast();
-  const [isListing, setIsListing] = useState(false);
-  const [marketList, setMarketList] = useState<string[]>([]);
-  const [isListDialogOpen, setIsListDialogOpen] = useState(false);
+type SupermarketControlsProps = {
+  isListing: boolean;
+  marketList: string[];
+  isListDialogOpen: boolean;
+  onListClick: () => void;
+  onDialogClose: () => void;
+};
 
-  const handleListSupermarkets = async () => {
-    setIsListing(true);
-    try {
-      const result = await listSupermarketsInCity({ city: 'Indaiatuba' });
-      setMarketList(result.supermarkets);
-      setIsListDialogOpen(true);
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao Listar Mercados',
-        description: 'Não foi possível obter a lista de supermercados.',
-      });
-    } finally {
-      setIsListing(false);
-    }
-  };
 
+function SupermarketControls({ 
+  isListing, 
+  marketList, 
+  isListDialogOpen,
+  onListClick,
+  onDialogClose
+}: SupermarketControlsProps) {
+  
   return (
     <>
       <div className="absolute top-4 right-4 z-10">
-        <Button onClick={handleListSupermarkets} disabled={isListing}>
+        <Button onClick={onListClick} disabled={isListing}>
           {isListing ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
@@ -64,7 +57,7 @@ function SupermarketControls() {
           Listar Supermercados
         </Button>
       </div>
-      <AlertDialog open={isListDialogOpen} onOpenChange={setIsListDialogOpen}>
+      <AlertDialog open={isListDialogOpen} onOpenChange={onDialogClose}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supermercados Encontrados em Indaiatuba</AlertDialogTitle>
@@ -80,7 +73,7 @@ function SupermarketControls() {
             </ul>
           </div>
           <AlertDialogFooter>
-            <AlertDialogAction>Fechar</AlertDialogAction>
+            <AlertDialogAction onClick={onDialogClose}>Fechar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -172,7 +165,6 @@ function SupermarketMap() {
             <Marker key={market.id} position={market.location} title={market.name} />
           ))}
         </GoogleMap>
-        <SupermarketControls />
          {isLoading && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -198,6 +190,28 @@ function SupermarketMap() {
 
 export default function MapPage() {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const { toast } = useToast();
+  const [isListing, setIsListing] = useState(false);
+  const [marketList, setMarketList] = useState<string[]>([]);
+  const [isListDialogOpen, setIsListDialogOpen] = useState(false);
+
+  const handleListSupermarkets = async () => {
+    setIsListing(true);
+    try {
+      const result = await listSupermarketsInCity({ city: 'Indaiatuba' });
+      setMarketList(result.supermarkets);
+      setIsListDialogOpen(true);
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao Listar Mercados',
+        description: 'Não foi possível obter a lista de supermercados.',
+      });
+    } finally {
+      setIsListing(false);
+    }
+  };
+
 
   if (!apiKey) {
     return (
@@ -231,7 +245,16 @@ export default function MapPage() {
       </CardHeader>
       <CardContent>
         <APIProvider apiKey={apiKey} libraries={['places']}>
-           <SupermarketMap />
+          <div className="relative">
+             <SupermarketMap />
+             <SupermarketControls
+                isListing={isListing}
+                marketList={marketList}
+                isListDialogOpen={isListDialogOpen}
+                onListClick={handleListSupermarkets}
+                onDialogClose={() => setIsListDialogOpen(false)}
+             />
+           </div>
         </APIProvider>
       </CardContent>
     </Card>
