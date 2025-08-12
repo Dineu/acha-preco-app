@@ -10,27 +10,9 @@ import {
   SuggestAlternateStoresInput,
   SuggestAlternateStoresOutput,
 } from '@/ai/flows/suggest-alternate-stores';
-import { Client, TextSearchRequest, Place } from '@googlemaps/google-maps-services-js';
 
-const client = new Client({});
-
-async function searchNearby(query: string): Promise<Partial<Place>[]> {
-  const request: TextSearchRequest = {
-    params: {
-      query,
-      key: process.env.GOOGLE_MAPS_API_KEY!,
-    },
-  };
-
-  try {
-    const response = await client.textSearch(request);
-    return response.data.results;
-  } catch (error) {
-    console.error('Error searching nearby places:', error);
-    throw new Error('Could not search for nearby places.');
-  }
-}
-
+// Note: The @googlemaps/google-maps-services-js client is not used here
+// as we are making a direct fetch call from the server action.
 
 export async function suggestMissingItems(input: SuggestMissingItemsInput): Promise<SuggestMissingItemsOutput> {
   try {
@@ -53,19 +35,50 @@ export async function suggestAlternateStores(input: SuggestAlternateStoresInput)
 }
 
 export async function listSupermarketsInCity(input: { city: string }): Promise<{ supermarkets: string[] }> {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    console.error('Google Maps API key is not configured.');
+    throw new Error('API key is missing.');
+  }
+
   try {
-    console.log(`Searching for supermarkets in ${input.city}`);
     const query = `"Atacadão" OR "Assaí Atacadista" OR "Roldão Atacadista" OR "Sonda Supermercados" OR "Supermercado Sumerbol" OR "Supermercados Pague Menos" OR "Supermercado GoodBom" OR "Supermercado Pão de Acucar" OR "Covabra Supermercados" em ${input.city}`;
-    const results = await searchNearby(query);
-    const names = results.map((place) => place.name).filter((name): name is string => !!name);
     
-    // Remove duplicates
+    const url = new URL('https://maps.googleapis.com/maps/api/place/textsearch/json');
+    url.searchParams.append('query', query);
+    url.searchParams.append('key', apiKey);
+
+    console.log(`Fetching supermarkets from: ${url.toString()}`);
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Google Maps API error: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`Failed to fetch from Google Maps API: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.status !== 'OK') {
+      console.error('Google Maps API returned a non-OK status:', data.status, data.error_message);
+      throw new Error(`Google Maps API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
+    }
+
+    const names = data.results.map((place: any) => place.name).filter((name?: string): name is string => !!name);
+    
     const uniqueNames = [...new Set(names)];
 
     console.log(`Found ${uniqueNames.length} unique supermarkets.`);
     return { supermarkets: uniqueNames };
+
   } catch (error) {
-    console.error('Error listing supermarkets:', error);
+    console.error('Error in listSupermarketsInCity:', error);
     throw new Error('Failed to get supermarket list.');
   }
 }
