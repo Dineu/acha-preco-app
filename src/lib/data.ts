@@ -46,4 +46,7 @@ export const mockMarkets: Market[] = [
     { id: 'market-3', name: 'Sumerbol', location: { lat: -23.095, lng: -47.218 } },
     { id: 'market-4', name: 'Sonda Supermercados', location: { lat: -23.081, lng: -47.199 } },
     { id: 'market-5', name: 'Tenda Atacado', location: { lat: -23.109, lng: -47.213 } },
+    { id: 'market-6', name: 'Pague Menos', location: { lat: -23.107, lng: -47.228 } },
+    { id: 'market-7', name: 'Roldão Atacadista', location: { lat: -23.123, lng: -47.211 } },
+    { id: 'market-8', name: 'Assaí Atacadista', location: { lat: -23.125, lng: -47.210 } },
 ];
