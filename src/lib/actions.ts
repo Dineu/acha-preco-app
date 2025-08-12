@@ -48,6 +48,7 @@ export async function listSupermarketsInCity(input: { city: string }): Promise<{
     url.searchParams.append('query', query);
     url.searchParams.append('key', apiKey);
 
+    // Log the URL to the server console for debugging
     console.log(`Fetching supermarkets from: ${url.toString()}`);
 
     const response = await fetch(url.toString(), {
