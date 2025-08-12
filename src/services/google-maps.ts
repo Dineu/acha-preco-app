@@ -35,7 +35,6 @@ export async function searchNearby(query: string, type: 'supermarket'): Promise<
             query: type,
             location: location,
             radius: 5000, // search within a 5km radius
-            type: type,
             key: process.env.GOOGLE_MAPS_API_KEY!,
         },
     };
