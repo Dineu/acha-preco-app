@@ -196,6 +196,7 @@ function MapPageContent() {
   const [isListing, setIsListing] = useState(false);
   const [marketList, setMarketList] = useState<string[]>([]);
   const [isListDialogOpen, setIsListDialogOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const places = useMapsLibrary('places');
   const map = useMap();
@@ -213,6 +214,7 @@ function MapPageContent() {
     
     console.log('[CLIENT] Botão "Listar Supermercados" clicado.');
     setIsListing(true);
+    setError(null);
     
     const searchQuery = `"Atacadão" OR "Assaí Atacadista" OR "Roldão Atacadista" OR "Sonda Supermercados" OR "Supermercado Sumerbol" OR "Supermercados Pague Menos" OR "Supermercado GoodBom" OR "Supermercado Pão de Acucar" OR "Covabra Supermercados" OR "MonteKali Supermercado" em Indaiatuba`;
 
@@ -238,12 +240,19 @@ function MapPageContent() {
         });
       }
 
-    } catch (error) {
-      console.error('[CLIENT] Erro ao buscar lista de supermercados:', error);
+    } catch (e) {
+      let errorMessage = 'Não foi possível obter a lista de supermercados. Verifique o console para mais detalhes.';
+      if (e instanceof Error) {
+        console.error('[CLIENT] Erro ao buscar lista de supermercados:', e);
+        if (e.message.includes('403')) {
+          errorMessage = 'Erro de permissão (403). Verifique se a Places API está ativada e se as restrições da chave de API estão corretas.';
+        }
+      }
+      setError(errorMessage);
       toast({
         variant: 'destructive',
         title: 'Erro ao Listar Mercados',
-        description: 'Não foi possível obter a lista de supermercados. Verifique o console para mais detalhes.',
+        description: errorMessage,
       });
     } finally {
       setIsListing(false);
@@ -278,10 +287,16 @@ export default function MapPage() {
         <CardContent>
           <Alert variant="destructive">
             <Terminal className="h-4 w-4" />
-            <AlertTitle>API Key não configurada</AlertTitle>
+            <AlertTitle>Chave de API do Google Maps não configurada</AlertTitle>
             <AlertDescription>
               <p className="mb-2">
-                Para que o mapa funcione, a chave de API do Google Maps precisa ser adicionada ao seu arquivo <code>.env</code> como `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`.
+                Para que o mapa funcione, a chave de API do Google Maps precisa ser adicionada ao seu arquivo <code>.env</code> como:
+              </p>
+              <pre className="text-xs bg-muted p-2 rounded-md overflow-x-auto">
+                <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=SUA_CHAVE_AQUI</code>
+              </pre>
+              <p className="mt-2">
+                Certifique-se de que as APIs "Maps JavaScript API" e "Places API" estão ativadas no seu projeto do Google Cloud.
               </p>
             </AlertDescription>
           </Alert>
