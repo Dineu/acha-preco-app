@@ -35,7 +35,7 @@ function SupermarketMap() {
     
     const service = placesServiceRef.current;
     
-    const searchQuery = 'supermercado OU Atacadão OU Assaí Atacadista OU Roldão em Indaiatuba';
+    const searchQuery = 'supermercado OU Atacadão OU Assaí Atacadista OU Roldão OU Sonda Supermercados em Indaiatuba';
 
     setIsLoading(true);
 
