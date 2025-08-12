@@ -62,6 +62,7 @@ const findSupermarketsFlow = ai.defineFlow(
     outputSchema: FindSupermarketsOutputSchema,
   },
   async (input) => {
+    // We don't need to call a prompt, we can just call the tool directly.
     const result = await findSupermarketsTool(input);
     return result;
   }
