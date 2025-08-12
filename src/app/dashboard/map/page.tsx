@@ -109,7 +109,7 @@ function SupermarketMap() {
     
     const service = placesServiceRef.current;
     
-    const searchQuery = 'supermercado OU Atacadão OU Assaí Atacadista OU Roldão OU Sonda Supermercados em Indaiatuba';
+    const searchQuery = 'supermercado OU Atacadão OU Assaí Atacadista OU Roldão OU Sonda Supermercados OU Supermercado Sumerbol OU Supermercados Pague Menos OU Supermercado GoodBom em Indaiatuba';
 
     setIsLoading(true);
 
