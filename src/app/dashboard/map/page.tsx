@@ -24,7 +24,7 @@ export default function MapPage() {
       try {
         setIsLoading(true);
         // We now search dynamically
-        const result = await findSupermarkets({ query: 'supermercados em Indaiatuba' });
+        const result = await findSupermarkets({ query: 'Indaiatuba' });
         setMarkets(result.markets);
         setError(null);
       } catch (err) {
