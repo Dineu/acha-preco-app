@@ -137,9 +137,7 @@ function SupermarketMap({
               position={selectedMarket.location}
               onCloseClick={() => onMarkerClick(null)}
             >
-              <div className="p-2">
-                <p className="font-bold">{selectedMarket.name}</p>
-              </div>
+              <p className="font-semibold">{selectedMarket.name}</p>
             </InfoWindow>
           )}
 
