@@ -113,6 +113,7 @@ function SupermarketMap({
   useEffect(() => {
     if (map && selectedMarket) {
       map.panTo(selectedMarket.location);
+      map.setZoom(15);
     }
   }, [map, selectedMarket]);
 
@@ -125,18 +126,24 @@ function SupermarketMap({
           gestureHandling={'greedy'}
           disableDefaultUI={true}
         >
-          {markets.map((market) => (
-            <AdvancedMarker 
-              key={market.id} 
-              position={market.location} 
-              title={market.name}
-              onClick={() => onMarkerClick(market)}
-            >
-              <div className={selectedMarket?.id === market.id ? 'animate-pulse' : ''}>
-                 <Pin />
-              </div>
-            </AdvancedMarker>
-          ))}
+          {markets.map((market) => {
+            const isSelected = selectedMarket?.id === market.id;
+            return (
+              <AdvancedMarker 
+                key={market.id} 
+                position={market.location} 
+                title={market.name}
+                onClick={() => onMarkerClick(market)}
+              >
+                  <Pin 
+                    background={isSelected ? 'hsl(var(--accent))' : 'hsl(var(--primary))'}
+                    borderColor={isSelected ? 'hsl(var(--accent-foreground))' : 'hsl(var(--primary-foreground))'}
+                    glyphColor={isSelected ? 'hsl(var(--accent-foreground))' : 'hsl(var(--primary-foreground))'}
+                    scale={isSelected ? 1.2 : 1}
+                  />
+              </AdvancedMarker>
+            )
+          })}
         </GoogleMap>
          {isLoading && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
@@ -181,19 +188,19 @@ function MapPageContent() {
     setError(null);
   
     const supermarketQueries = [
-      "Sumerbol Cidade Nova Indaiatuba",
-      "Sumerbol Morada do Sol Indaiatuba",
-      "Sumerbol Parque Ecologico Indaiatuba",
-      "Pague Menos em Indaiatuba",
-      "GoodBom em Indaiatuba",
-      "Covabra em Indaiatuba",
-      "Sonda em Indaiatuba",
-      "Atacadão em Indaiatuba",
-      "Assaí Atacadista em Indaiatuba",
-      "Roldão Atacadista em Indaiatuba",
-      "Pão de Açúcar em Indaiatuba",
-      "MonteKali Supermercado em Indaiatuba",
-      "Cato Supermercados em Indaiatuba"
+        "Sumerbol Cidade Nova Indaiatuba",
+        "Sumerbol Morada do Sol Indaiatuba",
+        "Sumerbol Parque Ecologico Indaiatuba",
+        "Pague Menos em Indaiatuba",
+        "GoodBom em Indaiatuba",
+        "Covabra em Indaiatuba",
+        "Sonda em Indaiatuba",
+        "Atacadão em Indaiatuba",
+        "Assaí Atacadista em Indaiatuba",
+        "Roldão Atacadista em Indaiatuba",
+        "Pão de Açúcar em Indaiatuba",
+        "MonteKali Supermercado em Indaiatuba",
+        "Cato Supermercados em Indaiatuba"
     ];
   
     try {
