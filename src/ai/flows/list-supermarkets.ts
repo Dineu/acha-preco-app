@@ -9,15 +9,32 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { findSupermarketsTool, FindSupermarketsInputSchema, FindSupermarketsOutputSchema } from '../tools/findSupermarkets';
+import { findSupermarkets } from '@/ai/tools/findSupermarkets';
 
-export type ListSupermarketsInput = z.infer<typeof FindSupermarketsInputSchema>;
-export type ListSupermarketsOutput = z.infer<typeof FindSupermarketsOutputSchema>;
+const ListSupermarketsInputSchema = z.object({
+  city: z.string().describe('The city to search for supermarkets in.'),
+});
+const ListSupermarketsOutputSchema = z.object({
+  supermarkets: z.array(z.string()).describe('A list of supermarket names.'),
+});
+
+export type ListSupermarketsInput = z.infer<typeof ListSupermarketsInputSchema>;
+export type ListSupermarketsOutput = z.infer<typeof ListSupermarketsOutputSchema>;
+
+const findSupermarketsTool = ai.defineTool(
+  {
+    name: 'findSupermarkets',
+    description: 'Finds supermarkets in a given city, including major chains.',
+    inputSchema: ListSupermarketsInputSchema,
+    outputSchema: ListSupermarketsOutputSchema,
+  },
+  async (input) => findSupermarkets(input)
+);
 
 const prompt = ai.definePrompt({
   name: 'listSupermarketsPrompt',
-  input: { schema: FindSupermarketsInputSchema },
-  output: { schema: FindSupermarketsOutputSchema },
+  input: { schema: ListSupermarketsInputSchema },
+  output: { schema: ListSupermarketsOutputSchema },
   tools: [findSupermarketsTool],
   prompt: `You are a helpful assistant. Use the findSupermarkets tool to list all supermarkets in the given city: {{city}}. Then, output the list of supermarkets you found.`,
 });
@@ -25,8 +42,8 @@ const prompt = ai.definePrompt({
 const listSupermarketsFlow = ai.defineFlow(
   {
     name: 'listSupermarketsFlow',
-    inputSchema: FindSupermarketsInputSchema,
-    outputSchema: FindSupermarketsOutputSchema,
+    inputSchema: ListSupermarketsInputSchema,
+    outputSchema: ListSupermarketsOutputSchema,
   },
   async (input) => {
     const { output } = await prompt(input);
