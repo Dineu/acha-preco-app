@@ -203,14 +203,14 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-headline">
-              <Lightbulb className="text-accent-foreground" /> Assistente IA
+              <Lightbulb /> Assistente IA
             </CardTitle>
             <CardDescription>
               Receba sugestões para otimizar suas compras.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Button className="w-full" onClick={handleSuggestMissingItems} disabled={isSuggestingItems}>
+          <CardContent className="space-y-2">
+            <Button variant="secondary" className="w-full" onClick={handleSuggestMissingItems} disabled={isSuggestingItems}>
               {isSuggestingItems ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -220,9 +220,9 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
             </Button>
 
             {missingItems.length > 0 && (
-              <div className="p-4 bg-secondary rounded-lg">
-                <h4 className="font-semibold mb-2">Itens sugeridos:</h4>
-                <ul className="list-disc list-inside text-sm space-y-1">
+              <div className="p-3 bg-muted rounded-lg">
+                <h4 className="font-semibold mb-2 text-sm">Itens sugeridos:</h4>
+                <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
                   {missingItems.map((item, index) => <li key={index}>{item}</li>)}
                 </ul>
               </div>
@@ -238,10 +238,10 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
             </Button>
 
             {alternateStores && (
-               <div className="p-4 bg-secondary rounded-lg">
-                <h4 className="font-semibold mb-2">Mercados alternativos:</h4>
-                <p className="text-sm mb-2">{alternateStores.reasoning}</p>
-                <ul className="list-disc list-inside text-sm space-y-1">
+               <div className="p-3 bg-muted rounded-lg">
+                <h4 className="font-semibold mb-2 text-sm">Mercados alternativos:</h4>
+                <p className="text-sm mb-2 text-muted-foreground">{alternateStores.reasoning}</p>
+                <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
                   {alternateStores.stores.map((store, index) => <li key={index}>{store}</li>)}
                 </ul>
               </div>
@@ -267,7 +267,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                 accept="image/*"
               />
               <Button 
-                variant="outline" 
+                variant="secondary" 
                 className="w-full" 
                 onClick={handleUploadButtonClick}
                 disabled={isExtractingPromotion}
