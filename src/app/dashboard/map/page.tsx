@@ -2,20 +2,25 @@
 
 import { useEffect, useState } from 'react';
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
+import type { Place } from '@googlemaps/google-maps-services-js';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2 } from 'lucide-react';
 import { findSupermarkets } from '@/lib/actions';
-import type { FindSupermarketsOutput } from '@/ai/flows/find-supermarkets';
 
-
-// We need to define the Market type here now since it's not exported from the flow
-type Market = FindSupermarketsOutput['markets'][0];
+type MarketLocation = {
+    id: string;
+    name: string;
+    location: {
+        lat: number;
+        lng: number;
+    };
+}
 
 export default function MapPage() {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const position = { lat: -23.089, lng: -47.218 }; // Center of Indaiatuba
-  const [markets, setMarkets] = useState<Market[]>([]);
+  const [markets, setMarkets] = useState<MarketLocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,9 +28,25 @@ export default function MapPage() {
     const fetchMarkets = async () => {
       try {
         setIsLoading(true);
-        // We now search dynamically
-        const result = await findSupermarkets({ query: 'Indaiatuba' });
-        setMarkets(result.markets);
+        const results: Partial<Place>[] = await findSupermarkets('supermercados em Indaiatuba');
+        
+        const formattedMarkets = results
+          .map(place => {
+            if (place.place_id && place.name && place.geometry?.location) {
+              return {
+                id: place.place_id,
+                name: place.name,
+                location: {
+                  lat: place.geometry.location.lat,
+                  lng: place.geometry.location.lng,
+                },
+              };
+            }
+            return null;
+          })
+          .filter((market): market is MarketLocation => market !== null);
+
+        setMarkets(formattedMarkets);
         setError(null);
       } catch (err) {
         setError('Não foi possível carregar os supermercados. Tente novamente mais tarde.');
