@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker } from '@vis.gl/react-google-maps';
+import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { listSupermarketsInCity } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -144,6 +143,9 @@ function SupermarketMap() {
         }
       } catch (e) {
         console.error('Error finding places:', e);
+        if (e instanceof Error) {
+            console.error('Error finding places:', e.message);
+        }
         setError('Ocorreu um erro ao buscar os supermercados. Verifique a chave de API e as configurações no console do Google Cloud.');
         setIsLoading(false);
       }
@@ -189,24 +191,55 @@ function SupermarketMap() {
 }
 
 
-export default function MapPage() {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+function MapPageContent() {
   const { toast } = useToast();
   const [isListing, setIsListing] = useState(false);
   const [marketList, setMarketList] = useState<string[]>([]);
   const [isListDialogOpen, setIsListDialogOpen] = useState(false);
+  
+  const places = useMapsLibrary('places');
+  const map = useMap();
+
 
   const handleListSupermarkets = async () => {
+    if (!places || !map) {
+      toast({
+        variant: 'destructive',
+        title: 'Mapa não está pronto',
+        description: 'A biblioteca de mapas ainda não foi carregada. Tente novamente em alguns segundos.',
+      });
+      return;
+    }
+    
     console.log('[CLIENT] Botão "Listar Supermercados" clicado.');
     setIsListing(true);
+    
+    const searchQuery = `"Atacadão" OR "Assaí Atacadista" OR "Roldão Atacadista" OR "Sonda Supermercados" OR "Supermercado Sumerbol" OR "Supermercados Pague Menos" OR "Supermercado GoodBom" OR "Supermercado Pão de Acucar" OR "Covabra Supermercados" em Indaiatuba`;
+
+    const request = {
+      textQuery: searchQuery,
+      fields: ['displayName'],
+      locationBias: map.getCenter()!,
+    };
+    
     try {
-      console.log('[CLIENT] Tentando chamar a server action listSupermarketsInCity...');
-      const result = await listSupermarketsInCity({ city: 'Indaiatuba' });
-      console.log('[CLIENT] Recebido resultado da server action:', result);
-      setMarketList(result.supermarkets);
-      setIsListDialogOpen(true);
+      // @ts-ignore
+      const { places: searchResults } = await google.maps.places.Place.searchByText(request);
+      
+      if (searchResults && searchResults.length > 0) {
+        const names = searchResults.map((place: any) => place.displayName).filter((name?: string): name is string => !!name);
+        const uniqueNames = [...new Set(names)];
+        setMarketList(uniqueNames);
+        setIsListDialogOpen(true);
+      } else {
+        toast({
+          title: 'Nenhum resultado',
+          description: 'Não foram encontrados supermercados para a busca.',
+        });
+      }
+
     } catch (error) {
-      console.error('[CLIENT] Erro ao chamar listSupermarketsInCity:', error);
+      console.error('[CLIENT] Erro ao buscar lista de supermercados:', error);
       toast({
         variant: 'destructive',
         title: 'Erro ao Listar Mercados',
@@ -216,8 +249,25 @@ export default function MapPage() {
       setIsListing(false);
     }
   };
+  
+   return (
+    <div className="relative">
+      <SupermarketMap />
+      <SupermarketControls
+        isListing={isListing}
+        marketList={marketList}
+        isListDialogOpen={isListDialogOpen}
+        onListClick={handleListSupermarkets}
+        onDialogClose={() => setIsListDialogOpen(false)}
+      />
+    </div>
+  );
+}
 
 
+export default function MapPage() {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  
   if (!apiKey) {
     return (
       <Card>
@@ -250,16 +300,7 @@ export default function MapPage() {
       </CardHeader>
       <CardContent>
         <APIProvider apiKey={apiKey} libraries={['places']}>
-          <div className="relative">
-             <SupermarketMap />
-             <SupermarketControls
-                isListing={isListing}
-                marketList={marketList}
-                isListDialogOpen={isListDialogOpen}
-                onListClick={handleListSupermarkets}
-                onDialogClose={() => setIsListDialogOpen(false)}
-             />
-           </div>
+           <MapPageContent />
         </APIProvider>
       </CardContent>
     </Card>
