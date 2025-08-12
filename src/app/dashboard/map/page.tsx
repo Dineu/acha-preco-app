@@ -124,8 +124,8 @@ function SupermarketMap() {
                             id: place.id,
                             name: place.displayName,
                             location: {
-                                lat: place.location.latitude,
-                                lng: place.location.longitude,
+                                lat: place.location.lat(),
+                                lng: place.location.lng(),
                             },
                         };
                     }
