@@ -15,10 +15,10 @@ type FindSupermarketsInput = z.infer<typeof FindSupermarketsInputSchema>;
 
 export async function findSupermarkets(input: FindSupermarketsInput) {
   console.log(`Searching for supermarkets in ${input.city}`);
-  const query = `supermercado em ${input.city}`;
+  const query = `supermercado OR "Atacadão" OR "Assaí Atacadista" OR "Roldão Atacadista" OR "Sonda Supermercados" OR "Supermercado Sumerbol" OR "Supermercados Pague Menos" OR "Supermercado GoodBom" OR "Supermercado Pão de Acucar" OR "Covabra Supermercados" em ${input.city}`;
 
   try {
-    const results = await searchNearby(query, 'supermarket');
+    const results = await searchNearby(query);
     const names = results.map((place) => place.name).filter((name): name is string => !!name);
 
     // Remove duplicates
