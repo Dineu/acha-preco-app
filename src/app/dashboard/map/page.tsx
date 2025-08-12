@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { APIProvider, Map as GoogleMap, useMap, Marker } from '@vis.gl/react-google-maps';
+import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2, List } from 'lucide-react';
@@ -88,56 +88,51 @@ function SupermarketMap() {
   const [markets, setMarkets] = useState<MarketLocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // A reference to the PlacesService instance. We'll reuse it.
-  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
 
   useEffect(() => {
     if (!map) return;
-
-    // Initialize the PlacesService once the map is available.
-    if (!placesServiceRef.current) {
-        placesServiceRef.current = new google.maps.places.PlacesService(map);
-    }
-    
-    const service = placesServiceRef.current;
     
     const searchQuery = `"Atacadão" OR "Assaí Atacadista" OR "Roldão Atacadista" OR "Sonda Supermercados" OR "Supermercado Sumerbol" OR "Supermercados Pague Menos" OR "Supermercado GoodBom" OR "Supermercado Pão de Acucar" OR "Covabra Supermercados" em Indaiatuba`;
 
     setIsLoading(true);
 
-    const request: google.maps.places.PlaceSearchRequest = {
-        location: map.getCenter()!,
-        radius: 10000, // 10km
-        query: searchQuery
+    const request = {
+      textQuery: searchQuery,
+      fields: ['displayName', 'location', 'place_id'],
+      locationBias: map.getCenter()!,
     };
 
-    service.textSearch(request, (results, status) => {
+    const findPlaces = async () => {
+      try {
+        // @ts-ignore
+        const {places} = await google.maps.places.Place.searchByText(request);
+        
         setIsLoading(false);
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-            const uniquePlaces = new Map<string, google.maps.places.PlaceResult>();
-            results.forEach(place => {
-                if (place.place_id) {
-                    uniquePlaces.set(place.place_id, place);
+
+        if (places && places.length > 0) {
+            const uniquePlaces = new Map<string, any>();
+            places.forEach((place: any) => {
+                if (place.id) {
+                    uniquePlaces.set(place.id, place);
                 }
             });
-
+            
             const formattedMarkets = Array.from(uniquePlaces.values())
                 .map(place => {
-                    if (place.place_id && place.name && place.geometry?.location) {
+                    if (place.id && place.displayName && place.location) {
                         return {
-                            id: place.place_id,
-                            name: place.name,
+                            id: place.id,
+                            name: place.displayName,
                             location: {
-                                lat: place.geometry.location.lat(),
-                                lng: place.geometry.location.lng(),
+                                lat: place.location.latitude,
+                                lng: place.location.longitude,
                             },
                         };
                     }
                     return null;
                 })
                 .filter((market): market is MarketLocation => market !== null);
-
+            
             if (formattedMarkets.length > 0) {
               setMarkets(formattedMarkets);
               setError(null);
@@ -145,10 +140,16 @@ function SupermarketMap() {
               setError('Não foi possível encontrar supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.');
             }
         } else {
-            console.error(`PlacesService failed with status:`, status);
-            setError('Ocorreu um erro ao buscar os supermercados. Verifique a chave de API e as configurações no console do Google Cloud.');
+            setError('Nenhum supermercado encontrado para a busca realizada.');
         }
-    });
+      } catch (e) {
+        console.error('Error finding places:', e);
+        setError('Ocorreu um erro ao buscar os supermercados. Verifique a chave de API e as configurações no console do Google Cloud.');
+        setIsLoading(false);
+      }
+    };
+    
+    findPlaces();
 
   }, [map]);
 
@@ -162,7 +163,7 @@ function SupermarketMap() {
           disableDefaultUI={true}
         >
           {markets.map((market) => (
-            <Marker key={market.id} position={market.location} title={market.name} />
+            <AdvancedMarker key={market.id} position={market.location} title={market.name} />
           ))}
         </GoogleMap>
          {isLoading && (
