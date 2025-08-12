@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, Pin, InfoWindow, useMapsLibrary } from '@vis.gl/react-google-maps';
+import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, Pin, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2, List } from 'lucide-react';
@@ -136,9 +136,9 @@ function SupermarketMap({
                 onClick={() => onMarkerClick(market)}
               >
                   <Pin 
-                    background={isSelected ? 'hsl(var(--accent))' : 'hsl(var(--primary))'}
-                    borderColor={isSelected ? 'hsl(var(--accent-foreground))' : 'hsl(var(--primary-foreground))'}
-                    glyphColor={isSelected ? 'hsl(var(--accent-foreground))' : 'hsl(var(--primary-foreground))'}
+                    background={isSelected ? 'hsl(var(--primary))' : 'hsl(var(--destructive))'}
+                    borderColor={'hsl(var(--destructive-foreground))'}
+                    glyphColor={'hsl(var(--destructive-foreground))'}
                     scale={isSelected ? 1.2 : 1}
                   />
               </AdvancedMarker>
@@ -220,12 +220,13 @@ function MapPageContent() {
       const uniquePlaces = new Map<string, any>();
   
       allPlaces.forEach((place: any) => {
-        if (place.id && !uniquePlaces.has(place.id)) {
+        if (place.id && !uniquePlaces.has(place.displayName)) {
             const name = place.displayName.toLowerCase();
+            // Aditional filter to avoid undesired places like glass stores
             if (name.includes('vidraçaria')) {
                 return;
             }
-            uniquePlaces.set(place.id, place);
+            uniquePlaces.set(place.displayName, place);
         }
       });
   
