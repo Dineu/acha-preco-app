@@ -147,8 +147,8 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
 
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="lg:col-span-2">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="md:col-span-2">
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">{list.name}</CardTitle>
@@ -172,7 +172,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                   <TableRow>
                     <TableHead className="w-[50px]">Comprado</TableHead>
                     <TableHead>Item</TableHead>
-                    <TableHead className="w-[100px] text-center">Ações</TableHead>
+                    <TableHead className="w-[100px] text-center whitespace-nowrap">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
