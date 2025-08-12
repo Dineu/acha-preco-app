@@ -190,7 +190,8 @@ function MapPageContent() {
       "Assaí Atacadista em Indaiatuba",
       "Roldão Atacadista em Indaiatuba",
       "Pão de Açúcar em Indaiatuba",
-      "MonteKali Supermercado em Indaiatuba"
+      "MonteKali Supermercado em Indaiatuba",
+      "Cato Supermercados em Indaiatuba"
     ];
   
     try {
