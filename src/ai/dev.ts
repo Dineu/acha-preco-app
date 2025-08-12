@@ -3,4 +3,3 @@ config();
 
 import '@/ai/flows/suggest-alternate-stores.ts';
 import '@/ai/flows/suggest-missing-items.ts';
-import '@/ai/flows/find-supermarkets.ts';

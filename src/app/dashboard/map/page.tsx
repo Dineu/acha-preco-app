@@ -34,16 +34,48 @@ function SupermarketMap() {
     }
     
     const service = placesServiceRef.current;
-    const request: google.maps.places.PlaceSearchRequest = {
-      location: map.getCenter()!,
-      radius: 5000, // Search within a 5km radius
-      query: 'supermercado'
-    };
+    
+    const searchQueries = [
+      'supermercado em Indaiatuba',
+      'Atacadão em Indaiatuba',
+      'Assaí Atacadista em Indaiatuba',
+      'Roldão Atacadista em Indaiatuba'
+    ];
+
+    const searchPromises = searchQueries.map(query => {
+      const request: google.maps.places.PlaceSearchRequest = {
+        location: map.getCenter()!,
+        radius: 10000, // Increased radius to ensure we find them all
+        query: query
+      };
+      return new Promise<google.maps.places.PlaceResult[]>((resolve, reject) => {
+        service.textSearch(request, (results, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+            resolve(results);
+          } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+            resolve([]); // No results is not an error
+          }
+          else {
+            reject(status);
+          }
+        });
+      });
+    });
 
     setIsLoading(true);
-    service.textSearch(request, (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-        const formattedMarkets = results
+    Promise.all(searchPromises)
+      .then(resultsArrays => {
+        const allPlaces = resultsArrays.flat();
+        
+        // Use a Map to filter out duplicate places by their ID
+        const uniquePlaces = new Map<string, google.maps.places.PlaceResult>();
+        allPlaces.forEach(place => {
+          if (place.place_id) {
+            uniquePlaces.set(place.place_id, place);
+          }
+        });
+
+        const formattedMarkets = Array.from(uniquePlaces.values())
           .map(place => {
             if (place.place_id && place.name && place.geometry?.location) {
               return {
@@ -61,12 +93,14 @@ function SupermarketMap() {
 
         setMarkets(formattedMarkets);
         setError(null);
-      } else {
+      })
+      .catch(status => {
          setError('Não foi possível carregar os supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.');
          console.error('PlacesService failed with status:', status);
-      }
-      setIsLoading(false);
-    });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
 
   }, [map]);
 
