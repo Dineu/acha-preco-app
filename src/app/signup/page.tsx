@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,45 +5,51 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/logo';
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="mx-auto w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="mb-4 flex justify-center">
             <Logo className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl font-headline">Acha Preço</CardTitle>
-          <CardDescription>Indaiatuba</CardDescription>
+          <CardTitle className="text-2xl font-headline">Criar Conta</CardTitle>
+          <CardDescription>
+            Entre com seus dados para criar uma conta
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="seu@email.com" required />
+              <Label htmlFor="full-name">Nome Completo</Label>
+              <Input id="full-name" placeholder="Seu Nome" required />
             </div>
             <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Senha</Label>
-                <Link href="#" className="ml-auto inline-block text-sm underline">
-                  Esqueceu sua senha?
-                </Link>
-              </div>
-              <Input id="password" type="password" required />
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Senha</Label>
+              <Input id="password" type="password" />
             </div>
             <Button type="submit" className="w-full">
-              <Link href="/dashboard" className="w-full">
-                Entrar
+               <Link href="/dashboard" className="w-full">
+                Criar conta
               </Link>
             </Button>
             <Button variant="outline" className="w-full">
-              Entrar com Google
+              Cadastrar com Google
             </Button>
           </div>
           <div className="mt-4 text-center text-sm">
-            Não tem uma conta?{' '}
-            <Link href="/signup" className="underline">
-              Cadastre-se
+            Já tem uma conta?{' '}
+            <Link href="/" className="underline">
+              Entrar
             </Link>
           </div>
         </CardContent>
