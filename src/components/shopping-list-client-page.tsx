@@ -112,27 +112,34 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const photoDataUri = e.target?.result as string;
-        setIsExtractingPromotion(true);
-        setExtractedPromotion(null);
-        try {
-          const result = await extractPromotionDetails({ photoDataUri });
-          setExtractedPromotion(result);
-          setIsPromotionDialogOpen(true);
-        } catch (error) {
-           toast({
-            variant: "destructive",
-            title: "Erro na Extração",
-            description: "Não foi possível extrair detalhes da promoção da imagem.",
-          });
-          console.error("Extraction error:", error);
-        } finally {
-          setIsExtractingPromotion(false);
-        }
-      };
-      reader.readAsDataURL(file);
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const photoDataUri = e.target?.result as string;
+          setIsExtractingPromotion(true);
+          setExtractedPromotion(null);
+          try {
+            const result = await extractPromotionDetails({ photoDataUri });
+            setExtractedPromotion(result);
+            setIsPromotionDialogOpen(true);
+          } catch (error) {
+            toast({
+              variant: "destructive",
+              title: "Erro na Extração",
+              description: "Não foi possível extrair detalhes da promoção da imagem.",
+            });
+            console.error("Extraction error:", error);
+          } finally {
+            setIsExtractingPromotion(false);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else if (file.type === 'application/pdf') {
+        toast({
+          title: "Funcionalidade em desenvolvimento",
+          description: "O upload de PDFs de ofertas ainda não está disponível. Por favor, envie uma imagem da promoção.",
+        });
+      }
     }
     // Reset file input to allow uploading the same file again
     event.target.value = '';
@@ -265,7 +272,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                 ref={fileInputRef} 
                 className="hidden" 
                 onChange={handleFileChange}
-                accept="image/*"
+                accept="image/*,application/pdf"
               />
               <Button 
                 variant="secondary" 
