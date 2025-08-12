@@ -37,14 +37,14 @@ const prompt = ai.definePrompt({
   name: 'suggestAlternateStoresPrompt',
   input: {schema: SuggestAlternateStoresInputSchema},
   output: {schema: SuggestAlternateStoresOutputSchema},
-  prompt: `You are a helpful shopping assistant. Given a list of items and the current store a user is considering, suggest alternate stores that might have better prices for the items on the list.
+  prompt: `Você é um assistente de compras prestativo. Dada uma lista de itens e a loja atual que um usuário está considerando, sugira lojas alternativas que possam ter preços melhores para os itens da lista.
 
-List of items: {{shoppingList}}
-Current store: {{currentStore}}
+Lista de itens: {{shoppingList}}
+Loja atual: {{currentStore}}
 
-Consider stores in Indaiatuba only.
+Considere apenas lojas na cidade de Indaiatuba, São Paulo.
 
-Respond with a list of alternate stores and a brief explanation of why you are suggesting them.`,
+Responda com uma lista de lojas alternativas e uma breve explicação do motivo pelo qual você as está sugerindo. A resposta deve ser em português.`,
 });
 
 const suggestAlternateStoresFlow = ai.defineFlow(
