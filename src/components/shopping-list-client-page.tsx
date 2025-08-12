@@ -16,6 +16,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { suggestMissingItems, suggestAlternateStores, extractPromotionDetails } from '@/lib/actions';
+import type { ExtractPromotionDetailsOutput } from '@/ai/flows/extract-promotion-details';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 
@@ -28,7 +29,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
   const [isSuggestingItems, setIsSuggestingItems] = useState(false);
   const [isSuggestingStores, setIsSuggestingStores] = useState(false);
   const [isExtractingPromotion, setIsExtractingPromotion] = useState(false);
-  const [extractedPromotion, setExtractedPromotion] = useState<{productName: string, price: number, store?: string} | null>(null)
+  const [extractedPromotion, setExtractedPromotion] = useState<ExtractPromotionDetailsOutput | null>(null)
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -285,16 +286,23 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
         <AlertDialog open={isPromotionDialogOpen} onOpenChange={setIsPromotionDialogOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Promoção Extraída com Sucesso!</AlertDialogTitle>
+                <AlertDialogTitle>Promoções Extraídas com Sucesso!</AlertDialogTitle>
                 <AlertDialogDescription>
-                    A IA analisou a imagem e encontrou os seguintes detalhes:
+                    A IA analisou a imagem e encontrou os seguintes detalhes.
+                    {extractedPromotion?.store && ` As ofertas parecem ser do supermercado: **${extractedPromotion.store}**.`}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               {extractedPromotion && (
-                <div className="text-sm">
-                  <p><strong>Produto:</strong> {extractedPromotion.productName}</p>
-                  <p><strong>Preço:</strong> R$ {extractedPromotion.price.toFixed(2)}</p>
-                  {extractedPromotion.store && <p><strong>Mercado:</strong> {extractedPromotion.store}</p>}
+                <div className="max-h-60 overflow-y-auto text-sm space-y-2 border-t pt-4 mt-2">
+                  {extractedPromotion.promotions.map((promo, index) => (
+                    <div key={index} className="p-2 bg-muted rounded-md">
+                        <p><strong>Produto:</strong> {promo.productName}</p>
+                        <p><strong>Preço:</strong> R$ {promo.price.toFixed(2)}</p>
+                    </div>
+                  ))}
+                  {extractedPromotion.promotions.length === 0 && (
+                    <p className="text-muted-foreground">Nenhuma promoção clara foi encontrada na imagem.</p>
+                  )}
                 </div>
               )}
               <AlertDialogFooter>
