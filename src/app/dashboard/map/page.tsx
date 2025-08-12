@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -228,7 +227,8 @@ function MapPageContent() {
                 }
                 return null;
             })
-            .filter((market): market is MarketLocation => market !== null);
+            .filter((market): market is MarketLocation => market !== null)
+            .sort((a, b) => a.name.localeCompare(b.name));
         
         if (formattedMarkets.length > 0) {
           setMarketList(formattedMarkets);
