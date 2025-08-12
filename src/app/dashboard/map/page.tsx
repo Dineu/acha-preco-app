@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, Pin, useMapsLibrary } from '@vis.gl/react-google-maps';
+import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, Pin, InfoWindow, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2, List } from 'lucide-react';
@@ -133,7 +133,7 @@ function SupermarketMap({
               onClick={() => onMarkerClick(market)}
             >
               <div className={selectedMarket?.id === market.id ? 'animate-pulse' : ''}>
-                <Pin />
+                 <Pin />
               </div>
             </AdvancedMarker>
           ))}
@@ -181,7 +181,9 @@ function MapPageContent() {
     setError(null);
   
     const supermarketQueries = [
-      "Sumerbol em Indaiatuba",
+      "Sumerbol Cidade Nova Indaiatuba",
+      "Sumerbol Morada do Sol Indaiatuba",
+      "Sumerbol Parque Ecologico Indaiatuba",
       "Pague Menos em Indaiatuba",
       "GoodBom em Indaiatuba",
       "Covabra em Indaiatuba",
@@ -212,7 +214,6 @@ function MapPageContent() {
   
       allPlaces.forEach((place: any) => {
         if (place.id && !uniquePlaces.has(place.id)) {
-            // Additional check to avoid non-supermarkets with similar names
             const name = place.displayName.toLowerCase();
             if (name.includes('vidraçaria')) {
                 return;
