@@ -197,16 +197,20 @@ export default function MapPage() {
   const [isListDialogOpen, setIsListDialogOpen] = useState(false);
 
   const handleListSupermarkets = async () => {
+    console.log('[CLIENT] Botão "Listar Supermercados" clicado.');
     setIsListing(true);
     try {
+      console.log('[CLIENT] Tentando chamar a server action listSupermarketsInCity...');
       const result = await listSupermarketsInCity({ city: 'Indaiatuba' });
+      console.log('[CLIENT] Recebido resultado da server action:', result);
       setMarketList(result.supermarkets);
       setIsListDialogOpen(true);
     } catch (error) {
+      console.error('[CLIENT] Erro ao chamar listSupermarketsInCity:', error);
       toast({
         variant: 'destructive',
         title: 'Erro ao Listar Mercados',
-        description: 'Não foi possível obter a lista de supermercados.',
+        description: 'Não foi possível obter a lista de supermercados. Verifique o console para mais detalhes.',
       });
     } finally {
       setIsListing(false);
