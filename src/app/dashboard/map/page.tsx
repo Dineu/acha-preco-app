@@ -181,17 +181,8 @@ function MapPageContent() {
     setIsLoading(true);
     setError(null);
     
-    const supermarketNames = [
-        "Atacadão", "Assaí Atacadista", "Roldão Atacadista", "Sonda Supermercados", 
-        "Sumerbol Cidade Nova", "Sumerbol Morada do Sol", "Sumerbol Pq. Ecológico",
-        "Supermercados Pague Menos", "Supermercado GoodBom", 
-        "Pão de Açúcar", "Covabra Supermercados", "MonteKali Supermercado"
-    ];
-    const searchQuery = `(${supermarketNames.join(') OR (')}) em Indaiatuba`;
-
-
     const request = {
-      textQuery: searchQuery,
+      textQuery: 'supermarket in Indaiatuba',
       fields: ['id', 'displayName', 'location', 'types'],
       locationBias: map.getCenter()!,
     };
@@ -205,9 +196,10 @@ function MapPageContent() {
         
         const validPlaces = searchResults.filter((place: any) => {
             const displayName = place.displayName.toLowerCase();
-            const isKnownName = supermarketNames.some(name => displayName.includes(name.toLowerCase()));
             const isSupermarketType = place.types.includes('supermarket') || place.types.includes('grocery_or_supermarket');
-            return isSupermarketType || isKnownName;
+            const isNotHardware = !place.types.includes('hardware_store');
+            const isNotGlass = !displayName.includes('vidraçaria');
+            return (isSupermarketType || isNotHardware) && isNotGlass;
         });
 
         validPlaces.forEach((place: any) => {
@@ -376,4 +368,3 @@ export default function MapPage() {
     </Card>
   );
 }
-
