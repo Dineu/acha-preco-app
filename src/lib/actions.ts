@@ -10,9 +10,6 @@ import {
   SuggestAlternateStoresInput,
   SuggestAlternateStoresOutput
 } from '@/ai/flows/suggest-alternate-stores';
-import { searchNearby } from '@/services/google-maps';
-import type { Place } from '@googlemaps/google-maps-services-js';
-
 
 export async function suggestMissingItems(input: SuggestMissingItemsInput): Promise<SuggestMissingItemsOutput> {
   try {
@@ -32,15 +29,4 @@ export async function suggestAlternateStores(input: SuggestAlternateStoresInput)
         console.error('Error suggesting alternate stores:', error);
         throw new Error('Failed to get store suggestions.');
     }
-}
-
-// Simplified action to directly fetch supermarkets
-export async function findSupermarkets(query: string): Promise<Partial<Place>[]> {
-  try {
-    const result = await searchNearby(query, 'supermarket');
-    return result;
-  } catch (error) {
-    console.error('Error finding supermarkets:', error);
-    throw new Error('Failed to find supermarkets.');
-  }
 }

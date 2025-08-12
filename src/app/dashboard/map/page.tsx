@@ -1,35 +1,48 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
-import type { Place } from '@googlemaps/google-maps-services-js';
+import { useEffect, useState, useRef } from 'react';
+import { APIProvider, Map, useMap, Marker } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2 } from 'lucide-react';
-import { findSupermarkets } from '@/lib/actions';
 
 type MarketLocation = {
-    id: string;
-    name: string;
-    location: {
-        lat: number;
-        lng: number;
-    };
-}
+  id: string;
+  name: string;
+  location: {
+    lat: number;
+    lng: number;
+  };
+};
 
-export default function MapPage() {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  const position = { lat: -23.089, lng: -47.218 }; // Center of Indaiatuba
+// We create a new component to be able to use the `useMap` hook.
+function SupermarketMap() {
+  const map = useMap();
   const [markets, setMarkets] = useState<MarketLocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // A reference to the PlacesService instance. We'll reuse it.
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
 
   useEffect(() => {
-    const fetchMarkets = async () => {
-      try {
-        setIsLoading(true);
-        const results: Partial<Place>[] = await findSupermarkets('supermercados em Indaiatuba');
-        
+    if (!map) return;
+
+    // Initialize the PlacesService once the map is available.
+    if (!placesServiceRef.current) {
+        placesServiceRef.current = new google.maps.places.PlacesService(map);
+    }
+    
+    const service = placesServiceRef.current;
+    const request: google.maps.places.PlaceSearchRequest = {
+      location: map.getCenter()!,
+      radius: 5000, // Search within a 5km radius
+      query: 'supermercado'
+    };
+
+    setIsLoading(true);
+    service.textSearch(request, (results, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
         const formattedMarkets = results
           .map(place => {
             if (place.place_id && place.name && place.geometry?.location) {
@@ -37,8 +50,8 @@ export default function MapPage() {
                 id: place.place_id,
                 name: place.name,
                 location: {
-                  lat: place.geometry.location.lat,
-                  lng: place.geometry.location.lng,
+                  lat: place.geometry.location.lat(),
+                  lng: place.geometry.location.lng(),
                 },
               };
             }
@@ -48,23 +61,57 @@ export default function MapPage() {
 
         setMarkets(formattedMarkets);
         setError(null);
-      } catch (err) {
-        setError('Não foi possível carregar os supermercados. Tente novamente mais tarde.');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
+      } else {
+         setError('Não foi possível carregar os supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.');
+         console.error('PlacesService failed with status:', status);
       }
-    };
+      setIsLoading(false);
+    });
 
-    if (apiKey) {
-      fetchMarkets();
-    }
-  }, [apiKey]);
+  }, [map]);
+
+  return (
+     <div className="h-[600px] w-full rounded-lg overflow-hidden border relative">
+        <Map
+          defaultCenter={{ lat: -23.089, lng: -47.218 }} // Indaiatuba
+          defaultZoom={13}
+          mapId="acha-preco-map"
+          gestureHandling={'greedy'}
+          disableDefaultUI={true}
+        >
+          {markets.map((market) => (
+            <Marker key={market.id} position={market.location} title={market.name} />
+          ))}
+        </Map>
+         {isLoading && (
+          <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="ml-2">Buscando supermercados...</p>
+          </div>
+        )}
+        {error && !isLoading && (
+           <div className="absolute inset-0 bg-background/80 flex items-center justify-center p-4">
+              <Alert variant="destructive" className="w-auto max-w-md">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Erro ao Carregar os Dados</AlertTitle>
+                <AlertDescription>
+                  <p>{error}</p>
+                </AlertDescription>
+              </Alert>
+          </div>
+        )}
+    </div>
+  )
+
+}
 
 
-  if (!apiKey || !process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
+export default function MapPage() {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey) {
     return (
-       <Card>
+      <Card>
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Mapa Interativo</CardTitle>
           <CardDescription>Localize os principais mercados e suas promoções.</CardDescription>
@@ -74,14 +121,8 @@ export default function MapPage() {
             <Terminal className="h-4 w-4" />
             <AlertTitle>API Key não configurada</AlertTitle>
             <AlertDescription>
-              <p className="mb-2">Para que o mapa funcione, a chave de API do Google Maps precisa ser adicionada ao seu arquivo <code>.env</code>.</p>
-              <p>Por favor, adicione as seguintes linhas, substituindo "SUA_CHAVE_AQUI" pela sua chave:</p>
-              <code className="mt-2 relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold block">
-                NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="SUA_CHAVE_AQUI"<br/>
-                GOOGLE_MAPS_API_KEY="SUA_CHAVE_AQUI"
-              </code>
-               <p className="mt-4 text-xs text-muted-foreground">
-                Se o erro persistir, certifique-se de que a API "Places API" está ativada no seu projeto Google Cloud e que a URL do seu site está autorizada nas restrições da chave.
+              <p className="mb-2">
+                Para que o mapa funcione, a chave de API do Google Maps precisa ser adicionada ao seu arquivo <code>.env</code> como `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`.
               </p>
             </AlertDescription>
           </Alert>
@@ -92,44 +133,16 @@ export default function MapPage() {
 
   return (
     <Card>
-       <CardHeader>
+      <CardHeader>
         <CardTitle className="font-headline text-2xl">Mapa Interativo</CardTitle>
-        <CardDescription>Localize os principais mercados e suas promoções, obtidos em tempo real.</CardDescription>
+        <CardDescription>
+          Localize os principais mercados e suas promoções, obtidos em tempo real.
+        </CardDescription>
       </CardHeader>
       <CardContent>
-         <div className="h-[600px] w-full rounded-lg overflow-hidden border relative">
-            <APIProvider apiKey={apiKey}>
-                <Map
-                    defaultCenter={position}
-                    defaultZoom={13}
-                    mapId="acha-preco-map"
-                    gestureHandling={'greedy'}
-                    disableDefaultUI={true}
-                >
-                    {markets.map((market) => (
-                        <Marker key={market.id} position={market.location} title={market.name} />
-                    ))}
-                </Map>
-            </APIProvider>
-             {isLoading && (
-              <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="ml-2">Buscando supermercados...</p>
-              </div>
-            )}
-            {error && !isLoading && (
-               <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                  <Alert variant="destructive" className="w-auto max-w-md">
-                    <Terminal className="h-4 w-4" />
-                    <AlertTitle>Erro ao Carregar os Dados</AlertTitle>
-                    <AlertDescription>
-                      <p>{error}</p>
-                       <p className="mt-2 text-xs">Verifique se a API "Places API" está ativada para sua chave no Google Cloud Console e que a chave foi adicionada corretamente ao arquivo <code>.env</code>.</p>
-                    </AlertDescription>
-                  </Alert>
-              </div>
-            )}
-        </div>
+        <APIProvider apiKey={apiKey} libraries={['places']}>
+           <SupermarketMap />
+        </APIProvider>
       </CardContent>
     </Card>
   );
