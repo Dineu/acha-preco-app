@@ -28,72 +28,6 @@ type MarketLocation = {
   };
 };
 
-type SupermarketControlsProps = {
-  isLoading: boolean;
-  marketList: MarketLocation[];
-  isListDialogOpen: boolean;
-  onListClick: () => void;
-  onDialogClose: () => void;
-  onMarketSelect: (market: MarketLocation) => void;
-};
-
-
-function SupermarketControls({ 
-  isLoading, 
-  marketList, 
-  isListDialogOpen,
-  onListClick,
-  onDialogClose,
-  onMarketSelect
-}: SupermarketControlsProps) {
-  
-  return (
-    <>
-      <div className="absolute top-4 right-4 z-10">
-        <Button onClick={onListClick} disabled={isLoading}>
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <List className="mr-2 h-4 w-4" />
-          )}
-          Listar Supermercados
-        </Button>
-      </div>
-      <AlertDialog open={isListDialogOpen} onOpenChange={onDialogClose}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Supermercados Encontrados em Indaiatuba</AlertDialogTitle>
-            <AlertDialogDescription>
-              Clique em um supermercado para vê-lo no mapa.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="max-h-60 overflow-y-auto">
-            <ul className="space-y-1">
-              {marketList.map((market) => (
-                <li key={market.id}>
-                   <Button 
-                    variant="link" 
-                    className="p-0 h-auto text-card-foreground"
-                    onClick={() => {
-                      onMarketSelect(market);
-                      onDialogClose();
-                    }}
-                  >
-                    {market.name}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={onDialogClose}>Fechar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
-}
-
 // We create a new component to be able to use the `useMap` hook.
 function SupermarketMap({ 
   markets, 
@@ -113,7 +47,7 @@ function SupermarketMap({
   useEffect(() => {
     if (map && selectedMarket) {
       map.panTo(selectedMarket.location);
-      map.setZoom(15);
+      map.setZoom(17);
     }
   }, [map, selectedMarket]);
 
@@ -139,7 +73,7 @@ function SupermarketMap({
                     background={isSelected ? 'hsl(var(--primary))' : 'hsl(var(--destructive))'}
                     borderColor={'hsl(var(--destructive-foreground))'}
                     glyphColor={'hsl(var(--destructive-foreground))'}
-                    scale={isSelected ? 1.2 : 1}
+                    scale={isSelected ? 1.5 : 1}
                   />
               </AdvancedMarker>
             )
@@ -305,20 +239,53 @@ function MapPageContent() {
   
    return (
     <div className="relative">
+       <div className="absolute top-4 right-4 z-10">
+         <Button onClick={handleOpenMarketList} disabled={isLoading}>
+           {isLoading ? (
+             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+           ) : (
+             <List className="mr-2 h-4 w-4" />
+           )}
+           Listar Supermercados
+         </Button>
+       </div>
+       <AlertDialog open={isListDialogOpen} onOpenChange={setIsListDialogOpen}>
+         <AlertDialogContent>
+           <AlertDialogHeader>
+             <AlertDialogTitle>Supermercados Encontrados em Indaiatuba</AlertDialogTitle>
+             <AlertDialogDescription>
+               Clique em um supermercado para vê-lo no mapa.
+             </AlertDialogDescription>
+           </AlertDialogHeader>
+           <div className="max-h-60 overflow-y-auto">
+             <ul className="space-y-1">
+               {marketList.map((market) => (
+                 <li key={market.id}>
+                    <Button 
+                     variant="link" 
+                     className="p-0 h-auto text-card-foreground"
+                     onClick={() => {
+                       setSelectedMarket(market);
+                       setIsListDialogOpen(false);
+                     }}
+                   >
+                     {market.name}
+                   </Button>
+                 </li>
+               ))}
+             </ul>
+           </div>
+           <AlertDialogFooter>
+             <AlertDialogAction onClick={() => setIsListDialogOpen(false)}>Fechar</AlertDialogAction>
+           </AlertDialogFooter>
+         </AlertDialogContent>
+       </AlertDialog>
       <SupermarketMap 
         markets={marketList} 
         isLoading={isLoading}
         error={error}
         selectedMarket={selectedMarket}
         onMarkerClick={handleMarkerClick}
-      />
-      <SupermarketControls
-        isLoading={isLoading}
-        marketList={marketList}
-        isListDialogOpen={isListDialogOpen}
-        onListClick={handleOpenMarketList}
-        onDialogClose={() => setIsListDialogOpen(false)}
-        onMarketSelect={setSelectedMarket}
       />
     </div>
   );
