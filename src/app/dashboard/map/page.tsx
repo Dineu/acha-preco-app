@@ -290,13 +290,27 @@ export default function MapPage() {
             <AlertTitle>Chave de API do Google Maps não configurada</AlertTitle>
             <AlertDescription>
               <p className="mb-2">
-                Para que o mapa funcione, a chave de API do Google Maps precisa ser adicionada ao seu arquivo <code>.env</code> como:
+                Para que o mapa funcione, a chave de API do Google Maps precisa ser adicionada ao seu arquivo de ambiente.
               </p>
-              <pre className="text-xs bg-muted p-2 rounded-md overflow-x-auto">
-                <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=SUA_CHAVE_AQUI</code>
-              </pre>
-              <p className="mt-2">
-                Certifique-se de que as APIs "Maps JavaScript API" e "Places API" estão ativadas no seu projeto do Google Cloud.
+              <ol className="list-decimal list-inside space-y-2 mb-4">
+                <li>
+                  Crie um arquivo chamado <code>.env</code> na raiz do seu projeto.
+                </li>
+                <li>
+                  Adicione a seguinte linha, substituindo <strong>SUA_CHAVE_AQUI</strong> pela sua chave de API real:
+                  <pre className="text-xs bg-muted p-2 rounded-md overflow-x-auto my-2">
+                    <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=SUA_CHAVE_AQUI</code>
+                  </pre>
+                </li>
+                <li>
+                  No Console do Google Cloud, certifique-se de que as APIs <strong>"Maps JavaScript API"</strong> e <strong>"Places API"</strong> estão ativadas para o seu projeto.
+                </li>
+                 <li>
+                  Reinicie o servidor de desenvolvimento para que as alterações tenham efeito.
+                </li>
+              </ol>
+               <p className="text-sm text-muted-foreground">
+                Se o erro persistir, verifique as restrições da sua chave de API no Google Cloud Console.
               </p>
             </AlertDescription>
           </Alert>
