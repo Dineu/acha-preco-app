@@ -98,7 +98,7 @@ function SupermarketMap() {
 
     const request = {
       textQuery: searchQuery,
-      fields: ['displayName', 'location', 'place_id'],
+      fields: ['displayName', 'location'],
       locationBias: map.getCenter()!,
     };
 
