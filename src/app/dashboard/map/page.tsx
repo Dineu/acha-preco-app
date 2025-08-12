@@ -204,15 +204,13 @@ function MapPageContent() {
         const uniquePlaces = new Map<string, any>();
         
         const validPlaces = searchResults.filter((place: any) => {
-            // A place is valid if it's a supermarket OR its name is one of the known supermarkets.
-            // This prevents "Vidraçaria Atacadão" while keeping "Assaí Atacadista" even if its type isn't 'supermarket'.
             const isKnownName = supermarketNames.some(name => place.displayName.includes(name));
             return place.types.includes('supermarket') || isKnownName;
         });
 
         validPlaces.forEach((place: any) => {
-            if (place.id) {
-                uniquePlaces.set(place.id, place);
+            if (place.id && !uniquePlaces.has(place.displayName)) {
+                uniquePlaces.set(place.displayName, place);
             }
         });
         
@@ -375,3 +373,4 @@ export default function MapPage() {
     </Card>
   );
 }
+
