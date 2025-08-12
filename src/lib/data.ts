@@ -49,4 +49,5 @@ export const mockMarkets: Market[] = [
     { id: 'market-6', name: 'Pague Menos', location: { lat: -23.1068, lng: -47.2285 } }, // Av. Ário Barnabé, 1330
     { id: 'market-7', name: 'Roldão Atacadista', location: { lat: -23.0903, lng: -47.2127 } }, // R. Almirante Tamandaré, 1345
     { id: 'market-8', name: 'Assaí Atacadista', location: { lat: -23.1245, lng: -47.2099 } }, // Av. Visc. de Indaiatuba, 1211
+    { id: 'market-9', name: 'Atacadão', location: { lat: -23.0833, lng: -47.1844 } }, // Rod. Eng. Ermênio de Oliveira Penteado (SP-075)
 ];
