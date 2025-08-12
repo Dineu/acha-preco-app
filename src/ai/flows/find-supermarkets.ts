@@ -20,12 +20,12 @@ const MarketSchema = z.object({
   }),
 });
 
-export const FindSupermarketsInputSchema = z.object({
+const FindSupermarketsInputSchema = z.object({
   query: z.string().describe('The search query, e.g., "supermarkets in Indaiatuba"'),
 });
 export type FindSupermarketsInput = z.infer<typeof FindSupermarketsInputSchema>;
 
-export const FindSupermarketsOutputSchema = z.object({
+const FindSupermarketsOutputSchema = z.object({
   markets: z.array(MarketSchema).describe('The list of found supermarkets.'),
 });
 export type FindSupermarketsOutput = z.infer<typeof FindSupermarketsOutputSchema>;
@@ -55,7 +55,7 @@ const findSupermarketsTool = ai.defineTool(
 );
 
 
-export const findSupermarketsFlow = ai.defineFlow(
+const findSupermarketsFlow = ai.defineFlow(
   {
     name: 'findSupermarketsFlow',
     inputSchema: FindSupermarketsInputSchema,

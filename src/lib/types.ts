@@ -15,11 +15,4 @@ export type ShoppingList = {
   updatedAt: string;
 };
 
-export type Market = {
-  id: string;
-  name: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
-};
+// Market type is now derived in the map page, so we can remove it from here.

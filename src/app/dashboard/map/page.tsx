@@ -5,9 +5,12 @@ import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2 } from 'lucide-react';
-import type { Market } from '@/lib/types';
 import { findSupermarkets } from '@/lib/actions';
+import type { FindSupermarketsOutput } from '@/ai/flows/find-supermarkets';
 
+
+// We need to define the Market type here now since it's not exported from the flow
+type Market = FindSupermarketsOutput['markets'][0];
 
 export default function MapPage() {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -100,7 +103,7 @@ export default function MapPage() {
                     <AlertTitle>Erro ao Carregar os Dados</AlertTitle>
                     <AlertDescription>
                       <p>{error}</p>
-                       <p className="mt-2 text-xs">Verifique se a API "Places API" está ativada para sua chave no Google Cloud Console e se a chave foi adicionada corretamente ao arquivo <code>.env</code>.</p>
+                       <p className="mt-2 text-xs">Verifique se a API "Places API" está ativada para sua chave no Google Cloud Console e que a chave foi adicionada corretamente ao arquivo <code>.env</code>.</p>
                     </AlertDescription>
                   </Alert>
               </div>
