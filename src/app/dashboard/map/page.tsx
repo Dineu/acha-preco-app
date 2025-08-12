@@ -35,40 +35,79 @@ function SupermarketMap() {
     
     const service = placesServiceRef.current;
     
-    // A single, more robust query to find all relevant places at once.
-    const request: google.maps.places.PlaceSearchRequest = {
-        location: map.getCenter()!,
-        radius: 10000,
-        query: 'supermercado ou Atacadão ou Assaí Atacadista ou Roldão em Indaiatuba'
-    };
+    const searchQueries = [
+        'supermercados em Indaiatuba',
+        'Atacadão em Indaiatuba',
+        'Assaí Atacadista em Indaiatuba',
+        'Roldão Atacadista em Indaiatuba',
+    ];
 
     setIsLoading(true);
-    service.textSearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-            const formattedMarkets = results
-            .map(place => {
-                if (place.place_id && place.name && place.geometry?.location) {
-                return {
-                    id: place.place_id,
-                    name: place.name,
-                    location: {
-                    lat: place.geometry.location.lat(),
-                    lng: place.geometry.location.lng(),
-                    },
-                };
-                }
-                return null;
-            })
-            .filter((market): market is MarketLocation => market !== null);
 
-            setMarkets(formattedMarkets);
-            setError(null);
-        } else {
-            setError('Não foi possível carregar os supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.');
-            console.error('PlacesService failed with status:', status);
-        }
-        setIsLoading(false);
+    const searchPromises = searchQueries.map(query => {
+        const request: google.maps.places.PlaceSearchRequest = {
+            location: map.getCenter()!,
+            radius: 10000, // 10km
+            query: query
+        };
+        return new Promise<google.maps.places.PlaceResult[]>((resolve, reject) => {
+            service.textSearch(request, (results, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                    resolve(results);
+                } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+                    resolve([]); // No results is not an error
+                } 
+                else {
+                    // For other statuses, we can log it but not fail the whole process
+                    console.error(`PlacesService failed for query "${query}" with status:`, status);
+                    resolve([]); // Resolve with empty to not block other results
+                }
+            });
+        });
     });
+
+    Promise.all(searchPromises)
+        .then(resultsArray => {
+            const allPlaces = resultsArray.flat();
+            
+            // Use a Map to filter out duplicate places by place_id
+            const uniquePlaces = new Map<string, google.maps.places.PlaceResult>();
+            allPlaces.forEach(place => {
+                if (place.place_id) {
+                    uniquePlaces.set(place.place_id, place);
+                }
+            });
+
+            const formattedMarkets = Array.from(uniquePlaces.values())
+                .map(place => {
+                    if (place.place_id && place.name && place.geometry?.location) {
+                        return {
+                            id: place.place_id,
+                            name: place.name,
+                            location: {
+                                lat: place.geometry.location.lat(),
+                                lng: place.geometry.location.lng(),
+                            },
+                        };
+                    }
+                    return null;
+                })
+                .filter((market): market is MarketLocation => market !== null);
+
+            if (formattedMarkets.length > 0) {
+              setMarkets(formattedMarkets);
+              setError(null);
+            } else {
+              setError('Não foi possível encontrar supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.');
+            }
+        })
+        .catch(err => {
+            console.error('Error during Places search:', err);
+            setError('Ocorreu um erro inesperado ao buscar os supermercados.');
+        })
+        .finally(() => {
+            setIsLoading(false);
+        });
 
   }, [map]);
 
