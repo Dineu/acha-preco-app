@@ -35,72 +35,40 @@ function SupermarketMap() {
     
     const service = placesServiceRef.current;
     
-    const searchQueries = [
-      'supermercado em Indaiatuba',
-      'Atacadão em Indaiatuba',
-      'Assaí Atacadista em Indaiatuba',
-      'Roldão Atacadista em Indaiatuba'
-    ];
-
-    const searchPromises = searchQueries.map(query => {
-      const request: google.maps.places.PlaceSearchRequest = {
+    // A single, more robust query to find all relevant places at once.
+    const request: google.maps.places.PlaceSearchRequest = {
         location: map.getCenter()!,
-        radius: 10000, // Increased radius to ensure we find them all
-        query: query
-      };
-      return new Promise<google.maps.places.PlaceResult[]>((resolve, reject) => {
-        service.textSearch(request, (results, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-            resolve(results);
-          } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-            resolve([]); // No results is not an error
-          }
-          else {
-            reject(status);
-          }
-        });
-      });
-    });
+        radius: 10000,
+        query: 'supermercado ou Atacadão ou Assaí Atacadista ou Roldão em Indaiatuba'
+    };
 
     setIsLoading(true);
-    Promise.all(searchPromises)
-      .then(resultsArrays => {
-        const allPlaces = resultsArrays.flat();
-        
-        // Use a Map to filter out duplicate places by their ID
-        const uniquePlaces = new Map<string, google.maps.places.PlaceResult>();
-        allPlaces.forEach(place => {
-          if (place.place_id) {
-            uniquePlaces.set(place.place_id, place);
-          }
-        });
+    service.textSearch(request, (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+            const formattedMarkets = results
+            .map(place => {
+                if (place.place_id && place.name && place.geometry?.location) {
+                return {
+                    id: place.place_id,
+                    name: place.name,
+                    location: {
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng(),
+                    },
+                };
+                }
+                return null;
+            })
+            .filter((market): market is MarketLocation => market !== null);
 
-        const formattedMarkets = Array.from(uniquePlaces.values())
-          .map(place => {
-            if (place.place_id && place.name && place.geometry?.location) {
-              return {
-                id: place.place_id,
-                name: place.name,
-                location: {
-                  lat: place.geometry.location.lat(),
-                  lng: place.geometry.location.lng(),
-                },
-              };
-            }
-            return null;
-          })
-          .filter((market): market is MarketLocation => market !== null);
-
-        setMarkets(formattedMarkets);
-        setError(null);
-      })
-      .catch(status => {
-         setError('Não foi possível carregar os supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.');
-         console.error('PlacesService failed with status:', status);
-      })
-      .finally(() => {
+            setMarkets(formattedMarkets);
+            setError(null);
+        } else {
+            setError('Não foi possível carregar os supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.');
+            console.error('PlacesService failed with status:', status);
+        }
         setIsLoading(false);
-      });
+    });
 
   }, [map]);
 
