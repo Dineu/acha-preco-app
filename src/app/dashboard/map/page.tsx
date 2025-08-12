@@ -54,7 +54,7 @@ export default function MapPage() {
                     disableDefaultUI={true}
                 >
                     {mockMarkets.map((market) => (
-                        <Marker key={market.id} position={market.location} title={market.name} />
+                        <Marker key={market.id} position={market.location} title={market.name} label={market.name} />
                     ))}
                 </Map>
             </APIProvider>
