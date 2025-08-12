@@ -10,6 +10,11 @@ import {
   SuggestAlternateStoresInput,
   SuggestAlternateStoresOutput
 } from '@/ai/flows/suggest-alternate-stores';
+import {
+  findSupermarkets as findSupermarketsFlow,
+  FindSupermarketsInput,
+  FindSupermarketsOutput,
+} from '@/ai/flows/find-supermarkets';
 
 export async function suggestMissingItems(input: SuggestMissingItemsInput): Promise<SuggestMissingItemsOutput> {
   try {
@@ -29,4 +34,14 @@ export async function suggestAlternateStores(input: SuggestAlternateStoresInput)
         console.error('Error suggesting alternate stores:', error);
         throw new Error('Failed to get store suggestions.');
     }
+}
+
+export async function findSupermarkets(input: FindSupermarketsInput): Promise<FindSupermarketsOutput> {
+  try {
+    const result = await findSupermarketsFlow(input);
+    return result;
+  } catch (error) {
+    console.error('Error finding supermarkets:', error);
+    throw new Error('Failed to find supermarkets.');
+  }
 }
