@@ -4,7 +4,21 @@ import { useEffect, useState, useRef } from 'react';
 import { APIProvider, Map as GoogleMap, useMap, Marker } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal, Loader2 } from 'lucide-react';
+import { Terminal, Loader2, List } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { listSupermarketsInCity } from '@/lib/actions';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
 
 type MarketLocation = {
   id: string;
@@ -14,6 +28,66 @@ type MarketLocation = {
     lng: number;
   };
 };
+
+function SupermarketControls() {
+  const { toast } = useToast();
+  const [isListing, setIsListing] = useState(false);
+  const [marketList, setMarketList] = useState<string[]>([]);
+  const [isListDialogOpen, setIsListDialogOpen] = useState(false);
+
+  const handleListSupermarkets = async () => {
+    setIsListing(true);
+    try {
+      const result = await listSupermarketsInCity({ city: 'Indaiatuba' });
+      setMarketList(result.supermarkets);
+      setIsListDialogOpen(true);
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao Listar Mercados',
+        description: 'Não foi possível obter a lista de supermercados.',
+      });
+    } finally {
+      setIsListing(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="absolute top-4 right-4 z-10">
+        <Button onClick={handleListSupermarkets} disabled={isListing}>
+          {isListing ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <List className="mr-2 h-4 w-4" />
+          )}
+          Listar Supermercados
+        </Button>
+      </div>
+      <AlertDialog open={isListDialogOpen} onOpenChange={setIsListDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supermercados Encontrados em Indaiatuba</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta é uma lista dos supermercados encontrados no Google Maps.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="max-h-60 overflow-y-auto">
+            <ul className="list-disc list-inside space-y-1">
+              {marketList.map((market, index) => (
+                <li key={index}>{market}</li>
+              ))}
+            </ul>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogAction>Fechar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
 
 // We create a new component to be able to use the `useMap` hook.
 function SupermarketMap() {
@@ -98,6 +172,7 @@ function SupermarketMap() {
             <Marker key={market.id} position={market.location} title={market.name} />
           ))}
         </GoogleMap>
+        <SupermarketControls />
          {isLoading && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
