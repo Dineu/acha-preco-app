@@ -37,12 +37,15 @@ const prompt = ai.definePrompt({
   name: 'suggestAlternateStoresPrompt',
   input: {schema: SuggestAlternateStoresInputSchema},
   output: {schema: SuggestAlternateStoresOutputSchema},
-  prompt: `Você é um assistente de compras prestativo. Dada uma lista de itens e a loja atual que um usuário está considerando, sugira lojas alternativas que possam ter preços melhores para os itens da lista.
+  prompt: `Você é um assistente de compras especialista na cidade de Indaiatuba, São Paulo. Dada uma lista de itens e a loja atual que um usuário está considerando, sugira lojas alternativas que possam ter preços melhores para os itens da lista.
 
 Lista de itens: {{shoppingList}}
 Loja atual: {{currentStore}}
 
-Considere apenas lojas na cidade de Indaiatuba, São Paulo.
+INSTRUÇÕES IMPORTANTES:
+1.  **Foco em Indaiatuba:** Considere apenas os seguintes supermercados que são os principais da cidade: Atacadão, Assaí Atacadista, Roldão Atacadista, Sonda Supermercados, Supermercado Sumerbol, Supermercados Pague Menos, Supermercado GoodBom, Pão de Açúcar, Covabra Supermercados.
+2.  **Preços Competitivos:** Lembre-se que "Atacadão", "Assaí Atacadista" e "Roldão Atacadista" são "atacarejos", e geralmente possuem preços mais baixos, especialmente para compras maiores.
+3.  **Não invente lojas:** Não sugira lojas que não estão na lista acima. O supermercado "Paulistão" não existe mais na cidade.
 
 Responda com uma lista de lojas alternativas e uma breve explicação do motivo pelo qual você as está sugerindo. A resposta deve ser em português.`,
 });
