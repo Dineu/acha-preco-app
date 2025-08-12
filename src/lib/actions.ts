@@ -35,9 +35,10 @@ export async function suggestAlternateStores(input: SuggestAlternateStoresInput)
 }
 
 export async function listSupermarketsInCity(input: { city: string }): Promise<{ supermarkets: string[] }> {
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  // Use the public key that is available on the client and server
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
-    console.error('Google Maps API key is not configured.');
+    console.error('Google Maps API key (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) is not configured.');
     throw new Error('API key is missing.');
   }
 
@@ -80,6 +81,10 @@ export async function listSupermarketsInCity(input: { city: string }): Promise<{
 
   } catch (error) {
     console.error('Error in listSupermarketsInCity:', error);
-    throw new Error('Failed to get supermarket list.');
+    // Let the client know what happened
+    if (error instanceof Error) {
+        throw new Error(`Failed to get supermarket list: ${error.message}`);
+    }
+    throw new Error('An unknown error occurred while fetching the supermarket list.');
   }
 }
