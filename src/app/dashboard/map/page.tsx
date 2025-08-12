@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, useMapsLibrary } from '@vis.gl/react-google-maps';
+import { APIProvider, Map as GoogleMap, useMap, AdvancedMarker, useMapsLibrary, InfoWindow } from '@vis.gl/react-google-maps';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal, Loader2, List } from 'lucide-react';
+import { Terminal, Loader2, List, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -29,10 +29,11 @@ type MarketLocation = {
 
 type SupermarketControlsProps = {
   isListing: boolean;
-  marketList: string[];
+  marketList: MarketLocation[];
   isListDialogOpen: boolean;
   onListClick: () => void;
   onDialogClose: () => void;
+  onMarketSelect: (market: MarketLocation) => void;
 };
 
 
@@ -41,7 +42,8 @@ function SupermarketControls({
   marketList, 
   isListDialogOpen,
   onListClick,
-  onDialogClose
+  onDialogClose,
+  onMarketSelect
 }: SupermarketControlsProps) {
   
   return (
@@ -61,13 +63,24 @@ function SupermarketControls({
           <AlertDialogHeader>
             <AlertDialogTitle>Supermercados Encontrados em Indaiatuba</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta é uma lista dos supermercados encontrados no Google Maps.
+              Clique em um supermercado para vê-lo no mapa.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="max-h-60 overflow-y-auto">
-            <ul className="list-disc list-inside space-y-1">
-              {marketList.map((market, index) => (
-                <li key={index}>{market}</li>
+            <ul className="space-y-1">
+              {marketList.map((market) => (
+                <li key={market.id}>
+                   <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-card-foreground"
+                    onClick={() => {
+                      onMarketSelect(market);
+                      onDialogClose();
+                    }}
+                  >
+                    {market.name}
+                  </Button>
+                </li>
               ))}
             </ul>
           </div>
@@ -80,80 +93,27 @@ function SupermarketControls({
   );
 }
 
-
 // We create a new component to be able to use the `useMap` hook.
-function SupermarketMap() {
+function SupermarketMap({ 
+  markets, 
+  isLoading, 
+  error, 
+  selectedMarket, 
+  onMarkerClick 
+}: { 
+  markets: MarketLocation[], 
+  isLoading: boolean, 
+  error: string | null,
+  selectedMarket: MarketLocation | null,
+  onMarkerClick: (market: MarketLocation | null) => void
+}) {
   const map = useMap();
-  const [markets, setMarkets] = useState<MarketLocation[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!map) return;
-    
-    const searchQuery = `"Atacadão" OR "Assaí Atacadista" OR "Roldão Atacadista" OR "Sonda Supermercados" OR "Supermercado Sumerbol" OR "Supermercados Pague Menos" OR "Supermercado GoodBom" OR "Supermercado Pão de Acucar" OR "Covabra Supermercados" OR "MonteKali Supermercado" em Indaiatuba`;
-
-    setIsLoading(true);
-
-    const request = {
-      textQuery: searchQuery,
-      fields: ['displayName', 'location'],
-      locationBias: map.getCenter()!,
-    };
-
-    const findPlaces = async () => {
-      try {
-        // @ts-ignore
-        const {places} = await google.maps.places.Place.searchByText(request);
-        
-        setIsLoading(false);
-
-        if (places && places.length > 0) {
-            const uniquePlaces = new Map<string, any>();
-            places.forEach((place: any) => {
-                if (place.id) {
-                    uniquePlaces.set(place.id, place);
-                }
-            });
-            
-            const formattedMarkets = Array.from(uniquePlaces.values())
-                .map(place => {
-                    if (place.id && place.displayName && place.location) {
-                        return {
-                            id: place.id,
-                            name: place.displayName,
-                            location: {
-                                lat: place.location.lat(),
-                                lng: place.location.lng(),
-                            },
-                        };
-                    }
-                    return null;
-                })
-                .filter((market): market is MarketLocation => market !== null);
-            
-            if (formattedMarkets.length > 0) {
-              setMarkets(formattedMarkets);
-              setError(null);
-            } else {
-              setError('Não foi possível encontrar supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.');
-            }
-        } else {
-            setError('Nenhum supermercado encontrado para a busca realizada.');
-        }
-      } catch (e) {
-        console.error('Error finding places:', e);
-        if (e instanceof Error) {
-            console.error('Error finding places:', e.message);
-        }
-        setError('Ocorreu um erro ao buscar os supermercados. Verifique a chave de API e as configurações no console do Google Cloud.');
-        setIsLoading(false);
-      }
-    };
-    
-    findPlaces();
-
-  }, [map]);
+    if (map && selectedMarket) {
+      map.panTo(selectedMarket.location);
+    }
+  }, [map, selectedMarket]);
 
   return (
      <div className="h-[600px] w-full rounded-lg overflow-hidden border relative">
@@ -165,8 +125,24 @@ function SupermarketMap() {
           disableDefaultUI={true}
         >
           {markets.map((market) => (
-            <AdvancedMarker key={market.id} position={market.location} title={market.name} />
+            <AdvancedMarker 
+              key={market.id} 
+              position={market.location} 
+              title={market.name}
+              onClick={() => onMarkerClick(market)}
+            />
           ))}
+          {selectedMarket && (
+            <InfoWindow
+              position={selectedMarket.location}
+              onCloseClick={() => onMarkerClick(null)}
+            >
+              <div className="p-2">
+                <p className="font-bold">{selectedMarket.name}</p>
+              </div>
+            </InfoWindow>
+          )}
+
         </GoogleMap>
          {isLoading && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
@@ -187,20 +163,20 @@ function SupermarketMap() {
         )}
     </div>
   )
-
 }
 
 
 function MapPageContent() {
   const { toast } = useToast();
   const [isListing, setIsListing] = useState(false);
-  const [marketList, setMarketList] = useState<string[]>([]);
+  const [marketList, setMarketList] = useState<MarketLocation[]>([]);
   const [isListDialogOpen, setIsListDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedMarket, setSelectedMarket] = useState<MarketLocation | null>(null);
   
   const places = useMapsLibrary('places');
   const map = useMap();
-
 
   const handleListSupermarkets = async () => {
     if (!places || !map) {
@@ -213,14 +189,16 @@ function MapPageContent() {
     }
     
     console.log('[CLIENT] Botão "Listar Supermercados" clicado.');
+    setIsLoading(true);
     setIsListing(true);
     setError(null);
+    setMarketList([]);
     
     const searchQuery = `"Atacadão" OR "Assaí Atacadista" OR "Roldão Atacadista" OR "Sonda Supermercados" OR "Supermercado Sumerbol" OR "Supermercados Pague Menos" OR "Supermercado GoodBom" OR "Supermercado Pão de Acucar" OR "Covabra Supermercados" OR "MonteKali Supermercado" em Indaiatuba`;
 
     const request = {
       textQuery: searchQuery,
-      fields: ['displayName'],
+      fields: ['id', 'displayName', 'location'],
       locationBias: map.getCenter()!,
     };
     
@@ -229,10 +207,42 @@ function MapPageContent() {
       const { places: searchResults } = await google.maps.places.Place.searchByText(request);
       
       if (searchResults && searchResults.length > 0) {
-        const names = searchResults.map((place: any) => place.displayName).filter((name?: string): name is string => !!name);
-        const uniqueNames = [...new Set(names)];
-        setMarketList(uniqueNames);
-        setIsListDialogOpen(true);
+        const uniquePlaces = new Map<string, any>();
+        searchResults.forEach((place: any) => {
+            if (place.id) {
+                uniquePlaces.set(place.id, place);
+            }
+        });
+        
+        const formattedMarkets = Array.from(uniquePlaces.values())
+            .map(place => {
+                if (place.id && place.displayName && place.location) {
+                    return {
+                        id: place.id,
+                        name: place.displayName,
+                        location: {
+                            lat: place.location.lat(),
+                            lng: place.location.lng(),
+                        },
+                    };
+                }
+                return null;
+            })
+            .filter((market): market is MarketLocation => market !== null);
+        
+        if (formattedMarkets.length > 0) {
+          setMarketList(formattedMarkets);
+          setIsListDialogOpen(true);
+          setError(null);
+        } else {
+           const errorMessage = 'Não foi possível encontrar supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.';
+           setError(errorMessage);
+           toast({
+              variant: 'destructive',
+              title: 'Nenhum resultado',
+              description: errorMessage,
+           });
+        }
       } else {
         toast({
           title: 'Nenhum resultado',
@@ -255,19 +265,27 @@ function MapPageContent() {
         description: errorMessage,
       });
     } finally {
+      setIsLoading(false);
       setIsListing(false);
     }
   };
   
    return (
     <div className="relative">
-      <SupermarketMap />
+      <SupermarketMap 
+        markets={marketList} 
+        isLoading={isLoading}
+        error={error}
+        selectedMarket={selectedMarket}
+        onMarkerClick={setSelectedMarket}
+      />
       <SupermarketControls
         isListing={isListing}
         marketList={marketList}
         isListDialogOpen={isListDialogOpen}
         onListClick={handleListSupermarkets}
         onDialogClose={() => setIsListDialogOpen(false)}
+        onMarketSelect={setSelectedMarket}
       />
     </div>
   );
