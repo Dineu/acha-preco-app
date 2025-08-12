@@ -183,10 +183,11 @@ function MapPageContent() {
     
     const supermarketNames = [
         "Atacadão", "Assaí Atacadista", "Roldão Atacadista", "Sonda Supermercados", 
-        "Supermercado Sumerbol", "Supermercados Pague Menos", "Supermercado GoodBom", 
-        "Supermercado Pão de Acucar", "Covabra Supermercados", "MonteKali Supermercado"
+        "Sumerbol Cidade Nova", "Sumerbol Morada do Sol", "Sumerbol Pq. Ecológico",
+        "Supermercados Pague Menos", "Supermercado GoodBom", 
+        "Pão de Açúcar", "Covabra Supermercados", "MonteKali Supermercado"
     ];
-    const searchQuery = `${supermarketNames.join('" OR "')} em Indaiatuba`;
+    const searchQuery = `(${supermarketNames.join(') OR (')}) em Indaiatuba`;
 
 
     const request = {
@@ -203,8 +204,10 @@ function MapPageContent() {
         const uniquePlaces = new Map<string, any>();
         
         const validPlaces = searchResults.filter((place: any) => {
-            const isKnownName = supermarketNames.some(name => place.displayName.includes(name));
-            return place.types.includes('supermarket') || isKnownName;
+            const displayName = place.displayName.toLowerCase();
+            const isKnownName = supermarketNames.some(name => displayName.includes(name.toLowerCase()));
+            const isSupermarketType = place.types.includes('supermarket') || place.types.includes('grocery_or_supermarket');
+            return isSupermarketType || isKnownName;
         });
 
         validPlaces.forEach((place: any) => {
