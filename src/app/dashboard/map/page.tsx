@@ -29,7 +29,7 @@ type MarketLocation = {
 };
 
 type SupermarketControlsProps = {
-  isListing: boolean;
+  isLoading: boolean;
   marketList: MarketLocation[];
   isListDialogOpen: boolean;
   onListClick: () => void;
@@ -39,7 +39,7 @@ type SupermarketControlsProps = {
 
 
 function SupermarketControls({ 
-  isListing, 
+  isLoading, 
   marketList, 
   isListDialogOpen,
   onListClick,
@@ -50,8 +50,8 @@ function SupermarketControls({
   return (
     <>
       <div className="absolute top-4 right-4 z-10">
-        <Button onClick={onListClick} disabled={isListing}>
-          {isListing ? (
+        <Button onClick={onListClick} disabled={isLoading}>
+          {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <List className="mr-2 h-4 w-4" />
@@ -162,10 +162,9 @@ function SupermarketMap({
 
 function MapPageContent() {
   const { toast } = useToast();
-  const [isListing, setIsListing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start loading immediately
   const [marketList, setMarketList] = useState<MarketLocation[]>([]);
   const [isListDialogOpen, setIsListDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedMarket, setSelectedMarket] = useState<MarketLocation | null>(null);
   
@@ -174,20 +173,13 @@ function MapPageContent() {
 
   const handleListSupermarkets = async () => {
     if (!places || !map) {
-      toast({
-        variant: 'destructive',
-        title: 'Mapa não está pronto',
-        description: 'A biblioteca de mapas ainda não foi carregada. Tente novamente em alguns segundos.',
-      });
+      // This will be retried by the useEffect hook once the map is ready.
       return;
     }
     
-    console.log('[CLIENT] Botão "Listar Supermercados" clicado.');
+    console.log('[CLIENT] Buscando supermercados...');
     setIsLoading(true);
-    setIsListing(true);
     setError(null);
-    setMarketList([]);
-    setSelectedMarket(null);
     
     const searchQuery = `"Atacadão" OR "Assaí Atacadista" OR "Roldão Atacadista" OR "Sonda Supermercados" OR "Supermercado Sumerbol" OR "Supermercados Pague Menos" OR "Supermercado GoodBom" OR "Supermercado Pão de Acucar" OR "Covabra Supermercados" OR "MonteKali Supermercado" em Indaiatuba`;
 
@@ -227,7 +219,6 @@ function MapPageContent() {
         
         if (formattedMarkets.length > 0) {
           setMarketList(formattedMarkets);
-          setIsListDialogOpen(true);
           setError(null);
         } else {
            const errorMessage = 'Não foi possível encontrar supermercados. Verifique se a API "Places API" está ativada no seu projeto Google Cloud e se as restrições da sua chave de API estão corretas.';
@@ -239,10 +230,7 @@ function MapPageContent() {
            });
         }
       } else {
-        toast({
-          title: 'Nenhum resultado',
-          description: 'Não foram encontrados supermercados para a busca.',
-        });
+        setError('Não foram encontrados supermercados para a busca.');
       }
 
     } catch (e) {
@@ -251,6 +239,8 @@ function MapPageContent() {
         console.error('[CLIENT] Erro ao buscar lista de supermercados:', e);
         if (e.message.includes('403')) {
           errorMessage = 'Erro de permissão (403). Verifique se a Places API está ativada e se as restrições da chave de API estão corretas.';
+        } else {
+          errorMessage = e.message;
         }
       }
       setError(errorMessage);
@@ -261,13 +251,30 @@ function MapPageContent() {
       });
     } finally {
       setIsLoading(false);
-      setIsListing(false);
     }
   };
+
+  // Run the search automatically when the component mounts and the map is ready.
+  useEffect(() => {
+    if (places && map) {
+      handleListSupermarkets();
+    }
+  }, [places, map]); // Dependencies ensure this runs when map/places are loaded.
 
   const handleMarkerClick = (market: MarketLocation | null) => {
     setSelectedMarket(market);
   };
+
+  const handleOpenMarketList = () => {
+    if (marketList.length > 0) {
+      setIsListDialogOpen(true);
+    } else {
+      toast({
+        title: 'Nenhum supermercado encontrado',
+        description: 'A busca não retornou resultados. Tente novamente mais tarde.',
+      });
+    }
+  }
   
    return (
     <div className="relative">
@@ -279,10 +286,10 @@ function MapPageContent() {
         onMarkerClick={handleMarkerClick}
       />
       <SupermarketControls
-        isListing={isListing}
+        isLoading={isLoading}
         marketList={marketList}
         isListDialogOpen={isListDialogOpen}
-        onListClick={handleListSupermarkets}
+        onListClick={handleOpenMarketList}
         onDialogClose={() => setIsListDialogOpen(false)}
         onMarketSelect={setSelectedMarket}
       />
@@ -352,5 +359,3 @@ export default function MapPage() {
     </Card>
   );
 }
-
-    
