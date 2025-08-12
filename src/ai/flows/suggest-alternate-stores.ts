@@ -43,7 +43,7 @@ Lista de itens: {{shoppingList}}
 Loja atual: {{currentStore}}
 
 INSTRUÇÕES IMPORTANTES:
-1.  **Foco em Indaiatuba:** Considere apenas os seguintes supermercados que são os principais da cidade: Atacadão, Assaí Atacadista, Roldão Atacadista, Sonda Supermercados, Supermercado Sumerbol, Supermercados Pague Menos, Supermercado GoodBom, Pão de Açúcar, Covabra Supermercados.
+1.  **Foco em Indaiatuba:** Considere apenas os seguintes supermercados que são os principais da cidade: Atacadão, Assaí Atacadista, Roldão Atacadista, Sonda Supermercados, Supermercado Sumerbol, Supermercados Pague Menos, Supermercado GoodBom, Pão de Açúcar, Covabra Supermercados, MonteKali Supermercado.
 2.  **Preços Competitivos:** Lembre-se que "Atacadão", "Assaí Atacadista" e "Roldão Atacadista" são "atacarejos", e geralmente possuem preços mais baixos, especialmente para compras maiores.
 3.  **Não invente lojas:** Não sugira lojas que não estão na lista acima. O supermercado "Paulistão" não existe mais na cidade.
 
