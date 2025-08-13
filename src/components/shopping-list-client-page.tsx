@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import type { ShoppingList, Item, PromotionItem } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import {
   Upload,
   Loader2,
   Tags,
+  Package,
 } from 'lucide-react';
 import { suggestMissingItems, suggestAlternateStores, extractPromotionDetails, comparePrices } from '@/lib/actions';
 import type { ExtractPromotionDetailsOutput } from '@/ai/flows/extract-promotion-details';
@@ -24,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import * as pdfjsLib from 'pdfjs-dist';
 import { MarkdownTable } from './markdown-table';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 // Set up the worker for pdfjs
 if (typeof window !== 'undefined') {
@@ -238,13 +240,26 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     });
   };
 
+  const groupedItems = useMemo(() => {
+    const grouped: { [store: string]: Item[] } = {};
+    list.items.forEach(item => {
+        const storeName = item.store || 'Outros'; 
+        if (!grouped[storeName]) {
+            grouped[storeName] = [];
+        }
+        grouped[storeName].push(item);
+    });
+    return Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b));
+  }, [list.items]);
+
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
       <div className="md:col-span-2">
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">{list.name}</CardTitle>
-            <CardDescription>Adicione, remova e marque os itens da sua lista.</CardDescription>
+            <CardDescription>Adicione novos itens e organize sua lista por mercado.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-2 mb-4">
@@ -271,51 +286,66 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                 <PlusCircle className="h-4 w-4 mr-2" /> Adicionar
               </Button>
             </div>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">Comprado</TableHead>
-                    <TableHead>Item</TableHead>
-                    <TableHead>Preço</TableHead>
-                    <TableHead>Mercado</TableHead>
-                    <TableHead className="w-[100px] text-center whitespace-nowrap">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {list.items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <Checkbox
-                          checked={item.checked}
-                          onCheckedChange={() => handleToggleItem(item.id)}
-                          aria-label={`Marcar ${item.name} como comprado`}
-                        />
-                      </TableCell>
-                      <TableCell className={`font-medium ${item.checked ? 'line-through text-muted-foreground' : ''}`}>
-                        {item.name}
-                      </TableCell>
-                       <TableCell>
-                        {item.price ? `R$ ${item.price.toFixed(2)}` : '-'}
-                      </TableCell>
-                       <TableCell>
-                        {item.store || '-'}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveItem(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Remover item</span>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+             {list.items.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  <Package className="h-12 w-12 mx-auto mb-4" />
+                  <p>Sua lista está vazia.</p>
+                  <p>Adicione itens acima para começar.</p>
+                </div>
+            ) : (
+                <Accordion type="multiple" defaultValue={groupedItems.map(([storeName]) => storeName)} className="w-full">
+                    {groupedItems.map(([storeName, items]) => (
+                        <AccordionItem value={storeName} key={storeName}>
+                            <AccordionTrigger className="font-bold text-lg">
+                                {storeName} ({items.length})
+                            </AccordionTrigger>
+                            <AccordionContent>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-[50px]">OK</TableHead>
+                                                <TableHead>Item</TableHead>
+                                                <TableHead className="text-right">Preço</TableHead>
+                                                <TableHead className="w-[50px] text-right">Ações</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                        {items.map((item) => (
+                                            <TableRow key={item.id}>
+                                            <TableCell>
+                                                <Checkbox
+                                                checked={item.checked}
+                                                onCheckedChange={() => handleToggleItem(item.id)}
+                                                aria-label={`Marcar ${item.name} como comprado`}
+                                                />
+                                            </TableCell>
+                                            <TableCell className={`font-medium ${item.checked ? 'line-through text-muted-foreground' : ''}`}>
+                                                {item.name}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                {item.price ? `R$ ${item.price.toFixed(2)}` : '-'}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleRemoveItem(item.id)}
+                                                >
+                                                <Trash2 className="h-4 w-4" />
+                                                <span className="sr-only">Remover item</span>
+                                                </Button>
+                                            </TableCell>
+                                            </TableRow>
+                                        ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            )}
           </CardContent>
         </Card>
       </div>
