@@ -24,7 +24,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarInset,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { UserNav } from '@/components/user-nav';
@@ -117,11 +116,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <div className="flex items-center gap-2">
-            <Logo className="h-8 w-8" />
-            <span className="text-lg font-semibold font-headline">Acha Preço</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+                <Logo className="h-8 w-8" />
+                <span className="text-lg font-semibold font-headline">Acha Preço</span>
+            </div>
+            <SidebarTrigger>Fechar</SidebarTrigger>
           </div>
-          <SidebarTrigger />
         </SidebarHeader>
         <SidebarContent>
           {/* Renderiza o menu de navegação. */}
@@ -144,10 +145,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </Sidebar>
 
       {/* O conteúdo da página atual é renderizado aqui. */}
-       <main className="flex-1 p-4 sm:px-6 sm:py-4">
+       <main className="flex-1">
           <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-0">
             {/* O SidebarTrigger é o botão para abrir/fechar a sidebar em dispositivos móveis. */}
-            <SidebarTrigger />
+            <SidebarTrigger>Menu</SidebarTrigger>
 
             <div className="flex flex-1 items-center justify-end gap-2">
               {/* Diálogo para criar uma nova lista. */}
@@ -194,7 +195,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </header>
 
-          <div className="mt-4">{children}</div>
+          <div className="p-4 sm:px-6 sm:py-4">{children}</div>
       </main>
     </SidebarProvider>
   );
