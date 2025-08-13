@@ -14,8 +14,9 @@ import {
   PlusCircle,
   Upload,
   Loader2,
+  CheckCircle,
 } from 'lucide-react';
-import { suggestMissingItems, suggestAlternateStores, extractPromotionDetails } from '@/lib/actions';
+import { suggestMissingItems, suggestAlternateStores, extractPromotionDetails, testAi } from '@/lib/actions';
 import type { ExtractPromotionDetailsOutput } from '@/ai/flows/extract-promotion-details';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
@@ -35,6 +36,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
   const [isSuggestingItems, setIsSuggestingItems] = useState(false);
   const [isSuggestingStores, setIsSuggestingStores] = useState(false);
   const [isExtractingPromotion, setIsExtractingPromotion] = useState(false);
+  const [isTestingAi, setIsTestingAi] = useState(false);
   const [extractedPromotion, setExtractedPromotion] = useState<ExtractPromotionDetailsOutput | null>(null)
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false);
 
@@ -186,6 +188,25 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     // Reset file input to allow uploading the same file again
     event.target.value = '';
   };
+  
+  const handleTestAi = async () => {
+    setIsTestingAi(true);
+    try {
+      const result = await testAi();
+      toast({
+        title: "Conexão bem-sucedida!",
+        description: result.message,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro de Conexão",
+        description: "Não foi possível se conectar com a IA.",
+      });
+    } finally {
+      setIsTestingAi(false);
+    }
+  };
 
 
   return (
@@ -296,6 +317,15 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                 </ul>
               </div>
             )}
+            
+            <Button variant="outline" className="w-full" onClick={handleTestAi} disabled={isTestingAi}>
+              {isTestingAi ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle className="mr-2 h-4 w-4" />
+              )}
+              Testar Conexão com a IA
+            </Button>
 
           </CardContent>
         </Card>
