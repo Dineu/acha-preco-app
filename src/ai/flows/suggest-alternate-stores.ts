@@ -47,6 +47,7 @@ export async function suggestAlternateStores(input: SuggestAlternateStoresInput)
 
 const prompt = ai.definePrompt({
   name: 'suggestAlternateStoresPrompt',
+  model: 'gemini-1.5-flash',
   input: {schema: SuggestAlternateStoresInputSchema},
   output: {schema: SuggestAlternateStoresOutputSchema},
   tools: [findSupermarketsTool],

@@ -42,6 +42,7 @@ export async function suggestMissingItems(input: SuggestMissingItemsInput): Prom
 
 const prompt = ai.definePrompt({
   name: 'suggestMissingItemsPrompt',
+  model: 'gemini-1.5-flash',
   input: {schema: SuggestMissingItemsInputSchema},
   output: {schema: SuggestMissingItemsOutputSchema},
   prompt: `You are a helpful shopping assistant. Given a list of items already in a user's shopping list, suggest other items that they might have forgotten to add.
