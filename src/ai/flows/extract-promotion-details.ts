@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -31,10 +32,12 @@ const ExtractPromotionDetailsInputSchema = z.object({
 });
 export type ExtractPromotionDetailsInput = z.infer<typeof ExtractPromotionDetailsInputSchema>;
 
-const PromotionItemSchema = z.object({
+export const PromotionItemSchema = z.object({
   productName: z.string().describe('The full name of a product on promotion, including brand and weight/volume if available.'),
   price: z.number().describe('The price of the product.'),
 });
+export type PromotionItem = z.infer<typeof PromotionItemSchema>;
+
 
 const ExtractPromotionDetailsOutputSchema = z.object({
   store: z.string().optional().describe('The name of the supermarket, if visible.'),

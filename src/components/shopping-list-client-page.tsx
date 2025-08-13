@@ -18,7 +18,7 @@ import {
   Tags,
 } from 'lucide-react';
 import { suggestMissingItems, suggestAlternateStores, extractPromotionDetails, comparePrices } from '@/lib/actions';
-import type { ExtractPromotionDetailsOutput } from '@/ai/flows/extract-promotion-details';
+import type { ExtractPromotionDetailsOutput, PromotionItem } from '@/ai/flows/extract-promotion-details';
 import type { ComparePricesOutput } from '@/ai/flows/price-comparison-flow';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
@@ -60,20 +60,24 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     }));
   };
 
-  const handleAddItem = () => {
-    if (newItemName.trim() === '') return;
+  const handleAddItem = (prefilledItem?: Partial<Item>) => {
+    const name = prefilledItem?.name || newItemName;
+    if (name.trim() === '') return;
+
     const newItem: Item = {
       id: `item-${Date.now()}`,
-      name: newItemName.trim(),
+      name: name.trim(),
       quantity: 1,
       checked: false,
-      price: newItemPrice ? parseFloat(newItemPrice) : undefined,
-      store: newItemStore.trim(),
+      price: prefilledItem?.price || (newItemPrice ? parseFloat(newItemPrice) : undefined),
+      store: prefilledItem?.store || newItemStore.trim(),
     };
     setList((prevList) => ({
       ...prevList,
       items: [...prevList.items, newItem],
     }));
+
+    // Reset input fields
     setNewItemName('');
     setNewItemPrice('');
     setNewItemStore('');
@@ -221,6 +225,18 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     // Reset file input to allow uploading the same file again
     event.target.value = '';
   };
+  
+  const handleAddPromotionToList = (promo: PromotionItem, store?: string) => {
+    handleAddItem({
+        name: promo.productName,
+        price: promo.price,
+        store: store || '',
+    });
+    toast({
+        title: "Item Adicionado!",
+        description: `"${promo.productName}" foi adicionado à sua lista.`,
+    });
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -251,7 +267,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                 placeholder="Mercado (opcional)"
                 className="w-full sm:w-40"
               />
-              <Button onClick={handleAddItem} className="w-full sm:w-auto">
+              <Button onClick={() => handleAddItem()} className="w-full sm:w-auto">
                 <PlusCircle className="h-4 w-4 mr-2" /> Adicionar
               </Button>
             </div>
@@ -409,9 +425,19 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                 <div className="max-h-60 overflow-y-auto text-sm space-y-2 border-t pt-4 mt-2">
                   {Array.isArray(extractedPromotion.promotions) && extractedPromotion.promotions.length > 0 ? (
                     extractedPromotion.promotions.map((promo, index) => (
-                      <div key={index} className="p-2 bg-muted rounded-md">
-                          <p><strong>Produto:</strong> {promo.productName}</p>
-                          <p><strong>Preço:</strong> R$ {promo.price.toFixed(2)}</p>
+                      <div key={index} className="p-2 bg-muted rounded-md flex items-center justify-between">
+                          <div>
+                            <p><strong>Produto:</strong> {promo.productName}</p>
+                            <p><strong>Preço:</strong> R$ {promo.price.toFixed(2)}</p>
+                          </div>
+                           <Button 
+                             size="sm" 
+                             variant="outline"
+                             onClick={() => handleAddPromotionToList(promo, extractedPromotion.store)}
+                           >
+                              <PlusCircle className="h-4 w-4 mr-2" />
+                              Adicionar
+                           </Button>
                       </div>
                     ))
                   ) : (
