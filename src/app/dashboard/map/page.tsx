@@ -136,7 +136,8 @@ function MapPageContent() {
         "Pão de Açúcar em Indaiatuba",
         "MonteKali Supermercado em Indaiatuba",
         "Cato Supermercados em Indaiatuba",
-        "Pistoni Supermercados em Indaiatuba"
+        "Pistoni Supermercados em Indaiatuba",
+        "Revolução Supermercado em Indaiatuba"
     ];
   
     try {
