@@ -34,6 +34,8 @@ if (typeof window !== 'undefined') {
 export default function ShoppingListClientPage({ initialList }: { initialList: ShoppingList }) {
   const [list, setList] = useState(initialList);
   const [newItemName, setNewItemName] = useState('');
+  const [newItemPrice, setNewItemPrice] = useState('');
+  const [newItemStore, setNewItemStore] = useState('');
   const [missingItems, setMissingItems] = useState<string[]>([]);
   const [alternateStores, setAlternateStores] = useState<{ stores: string[]; reasoning: string } | null>(null);
   const [isSuggestingItems, setIsSuggestingItems] = useState(false);
@@ -65,12 +67,16 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
       name: newItemName.trim(),
       quantity: 1,
       checked: false,
+      price: newItemPrice ? parseFloat(newItemPrice) : undefined,
+      store: newItemStore.trim(),
     };
     setList((prevList) => ({
       ...prevList,
       items: [...prevList.items, newItem],
     }));
     setNewItemName('');
+    setNewItemPrice('');
+    setNewItemStore('');
   };
 
   const handleRemoveItem = (itemId: string) => {
@@ -225,14 +231,27 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
             <CardDescription>Adicione, remova e marque os itens da sua lista.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2 mb-4">
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
               <Input
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
                 placeholder="Ex: Leite, Ovos, Pão..."
-                onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}
+                className="flex-grow"
               />
-              <Button onClick={handleAddItem}>
+               <Input
+                value={newItemPrice}
+                onChange={(e) => setNewItemPrice(e.target.value)}
+                placeholder="Preço (opcional)"
+                type="number"
+                className="w-full sm:w-24"
+              />
+              <Input
+                value={newItemStore}
+                onChange={(e) => setNewItemStore(e.target.value)}
+                placeholder="Mercado (opcional)"
+                className="w-full sm:w-40"
+              />
+              <Button onClick={handleAddItem} className="w-full sm:w-auto">
                 <PlusCircle className="h-4 w-4 mr-2" /> Adicionar
               </Button>
             </div>
@@ -242,6 +261,8 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                   <TableRow>
                     <TableHead className="w-[50px]">Comprado</TableHead>
                     <TableHead>Item</TableHead>
+                    <TableHead>Preço</TableHead>
+                    <TableHead>Mercado</TableHead>
                     <TableHead className="w-[100px] text-center whitespace-nowrap">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -257,6 +278,12 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                       </TableCell>
                       <TableCell className={`font-medium ${item.checked ? 'line-through text-muted-foreground' : ''}`}>
                         {item.name}
+                      </TableCell>
+                       <TableCell>
+                        {item.price ? `R$ ${item.price.toFixed(2)}` : '-'}
+                      </TableCell>
+                       <TableCell>
+                        {item.store || '-'}
                       </TableCell>
                       <TableCell className="text-center">
                         <Button
