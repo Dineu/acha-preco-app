@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef } from 'react';
@@ -22,6 +23,7 @@ import type { ComparePricesOutput } from '@/ai/flows/price-comparison-flow';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import * as pdfjsLib from 'pdfjs-dist';
+import { MarkdownTable } from './markdown-table';
 
 // Set up the worker for pdfjs
 if (typeof window !== 'undefined') {
@@ -406,9 +408,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
             </AlertDialogHeader>
             {priceComparisonResult && (
               <div className="max-h-[60vh] overflow-y-auto text-sm border-t pt-4 mt-2">
-                <pre className="text-sm font-mono whitespace-pre-wrap bg-muted p-4 rounded-md">
-                  {priceComparisonResult.priceTable}
-                </pre>
+                 <MarkdownTable markdown={priceComparisonResult.priceTable} />
               </div>
             )}
             <AlertDialogFooter>
