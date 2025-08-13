@@ -16,6 +16,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
 
@@ -239,17 +240,19 @@ function MapPageContent() {
   
    return (
     <div className="relative">
-       <div className="absolute top-4 right-4 z-10">
-         <Button onClick={handleOpenMarketList} disabled={isLoading}>
-           {isLoading ? (
-             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-           ) : (
-             <List className="mr-2 h-4 w-4" />
-           )}
-           Listar Supermercados
-         </Button>
-       </div>
        <AlertDialog open={isListDialogOpen} onOpenChange={setIsListDialogOpen}>
+        <AlertDialogTrigger asChild>
+          <div className="absolute top-4 right-4 z-10">
+            <Button onClick={handleOpenMarketList} disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <List className="mr-2 h-4 w-4" />
+              )}
+              Listar Supermercados
+            </Button>
+          </div>
+        </AlertDialogTrigger>
          <AlertDialogContent>
            <AlertDialogHeader>
              <AlertDialogTitle>Supermercados Encontrados em Indaiatuba</AlertDialogTitle>
