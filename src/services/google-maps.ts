@@ -2,16 +2,26 @@
  * @fileOverview A service for interacting with the Google Maps API.
  */
 import { Client, Place, PlaceInputType } from '@googlemaps/google-maps-services-js';
-import { env } from 'process';
 
 const client = new Client({});
+
+// Helper function to get the API key from environment variables.
+// It prioritizes a specific Google Maps key, but falls back to the Gemini key.
+function getApiKey(): string {
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        throw new Error('Google Maps API key is not configured for the server. Please set GOOGLE_MAPS_API_KEY or GEMINI_API_KEY in your .env file.');
+    }
+    return apiKey;
+}
+
 
 async function getCoordinatesForCity(city: string): Promise<{ lat: number; lng: number }> {
     try {
         const response = await client.geocode({
             params: {
                 address: city,
-                key: env.GOOGLE_MAPS_API_KEY!,
+                key: getApiKey(),
             },
         });
 
@@ -34,10 +44,7 @@ async function getCoordinatesForCity(city: string): Promise<{ lat: number; lng: 
  * @returns A list of places found.
  */
 export async function searchNearby(query: string, location: string): Promise<Partial<Place>[]> {
-  const apiKey = env.GOOGLE_MAPS_API_KEY;
-  if (!apiKey) {
-    throw new Error('Google Maps API key is not configured for the server.');
-  }
+  const apiKey = getApiKey();
 
   try {
      const cityCenter = await getCoordinatesForCity(location);
