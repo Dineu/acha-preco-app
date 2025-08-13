@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Map, PlusCircle, FlaskConical, Loader2, PanelLeft } from 'lucide-react';
+import { Home, Map, PlusCircle, FlaskConical, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -149,9 +149,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           {/* O SidebarTrigger é o botão para abrir/fechar a sidebar em dispositivos móveis. */}
-          <SidebarTrigger className="sm:hidden">
-            <PanelLeft />
-          </SidebarTrigger>
+          <SidebarTrigger className="sm:hidden" />
 
           <div className="flex flex-1 items-center justify-end gap-2">
             {/* Diálogo para criar uma nova lista. */}
