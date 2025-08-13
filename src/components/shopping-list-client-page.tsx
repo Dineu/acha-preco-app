@@ -26,32 +26,45 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import * as pdfjsLib from 'pdfjs-dist';
 import { MarkdownTable } from './markdown-table';
 
-// Set up the worker for pdfjs
+// Configura o worker para o processamento de PDFs no lado do cliente.
 if (typeof window !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 }
 
 
+/**
+ * @fileoverview Este componente de cliente gerencia toda a interatividade da página de detalhes da lista de compras.
+ * Ele lida com o estado da lista (adição/remoção/marcação de itens), e também com todas as
+ * interações de IA, como sugerir itens, comparar preços e extrair promoções de arquivos.
+ * @param {{ initialList: ShoppingList }} props - As propriedades do componente, contendo a lista inicial.
+ */
 export default function ShoppingListClientPage({ initialList }: { initialList: ShoppingList }) {
+  // Estado principal da lista de compras.
   const [list, setList] = useState(initialList);
+  // Estados para os campos de adição de novo item.
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
   const [newItemStore, setNewItemStore] = useState('');
+  // Estados para armazenar os resultados das chamadas de IA.
   const [missingItems, setMissingItems] = useState<string[]>([]);
   const [alternateStores, setAlternateStores] = useState<{ stores: string[]; reasoning: string } | null>(null);
+  const [priceComparisonResult, setPriceComparisonResult] = useState<ComparePricesOutput | null>(null);
+  const [extractedPromotion, setExtractedPromotion] = useState<ExtractPromotionDetailsOutput | null>(null);
+  // Estados para controlar o loading de cada chamada de IA.
   const [isSuggestingItems, setIsSuggestingItems] = useState(false);
   const [isSuggestingStores, setIsSuggestingStores] = useState(false);
   const [isExtractingPromotion, setIsExtractingPromotion] = useState(false);
   const [isComparingPrices, setIsComparingPrices] = useState(false);
-  const [priceComparisonResult, setPriceComparisonResult] = useState<ComparePricesOutput | null>(null);
+  // Estados para controlar a abertura dos diálogos (modals).
   const [isPriceDialogOpen, setIsPriceDialogOpen] = useState(false);
-  const [extractedPromotion, setExtractedPromotion] = useState<ExtractPromotionDetailsOutput | null>(null)
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false);
-
+  
+  // Referência para o input de arquivo, para acioná-lo programaticamente.
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
 
+  // Marca ou desmarca um item da lista.
   const handleToggleItem = (itemId: string) => {
     setList((prevList) => ({
       ...prevList,
@@ -61,6 +74,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     }));
   };
 
+  // Adiciona um novo item à lista. Pode receber um item preenchido (ex: vindo de uma promoção).
   const handleAddItem = (prefilledItem?: Partial<Item>) => {
     const name = prefilledItem?.name || newItemName;
     if (name.trim() === '') return;
@@ -78,12 +92,13 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
       items: [...prevList.items, newItem],
     }));
 
-    // Reset input fields
+    // Limpa os campos do formulário.
     setNewItemName('');
     setNewItemPrice('');
     setNewItemStore('');
   };
 
+  // Remove um item da lista.
   const handleRemoveItem = (itemId: string) => {
     setList((prevList) => ({
       ...prevList,
@@ -91,12 +106,12 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     }));
   };
   
+  // Chama a IA para sugerir itens com base na lista atual.
   const handleSuggestMissingItems = async () => {
     setIsSuggestingItems(true);
     setMissingItems([]);
     try {
       const existingItems = list.items.map(item => item.name);
-      console.log('[CLIENT] Enviando para a IA para sugerir itens:', { existingItems });
       const result = await suggestMissingItems({ existingItems });
       setMissingItems(result.suggestedItems);
     } catch (error) {
@@ -110,15 +125,13 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     }
   };
 
+  // Chama a IA para sugerir mercados alternativos.
   const handleSuggestAlternateStores = async () => {
     setIsSuggestingStores(true);
     setAlternateStores(null);
     try {
       const shoppingList = list.items.map(item => item.name);
-      const currentStore = "Carrefour"; 
-      const city = "Indaiatuba";
-      console.log('[CLIENT] Enviando para a IA para sugerir mercados:', { shoppingList, currentStore, city });
-      const result = await suggestAlternateStores({ shoppingList, currentStore, city });
+      const result = await suggestAlternateStores({ shoppingList, currentStore: "Carrefour", city: "Indaiatuba" });
       setAlternateStores({ stores: result.alternateStores, reasoning: result.reasoning });
     } catch (error) {
       toast({
@@ -131,15 +144,15 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     }
   };
 
+  // Chama a IA para comparar os preços dos itens da lista.
   const handleComparePrices = async () => {
     setIsComparingPrices(true);
     setPriceComparisonResult(null);
     try {
       const shoppingList = list.items.map(item => item.name);
-      console.log('[CLIENT] Enviando para a IA para comparar preços:', { shoppingList });
       const result = await comparePrices({ shoppingList, city: 'Indaiatuba' });
       setPriceComparisonResult(result);
-      setIsPriceDialogOpen(true);
+      setIsPriceDialogOpen(true); // Abre o diálogo com os resultados.
     } catch (error: any) {
         toast({
             variant: "destructive",
@@ -151,18 +164,19 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     }
   };
 
-
+  // Aciona o clique no input de arquivo oculto.
   const handleUploadButtonClick = () => {
     fileInputRef.current?.click();
   };
   
+  // Processa o arquivo (imagem ou PDF) e chama a IA para extrair os detalhes da promoção.
   const processAndExtract = async (photoDataUri: string) => {
     setIsExtractingPromotion(true);
     setExtractedPromotion(null);
     try {
       const result = await extractPromotionDetails({ photoDataUri });
       setExtractedPromotion(result);
-      setIsPromotionDialogOpen(true);
+      setIsPromotionDialogOpen(true); // Abre o diálogo com as promoções extraídas.
     } catch (error) {
       toast({
         variant: "destructive",
@@ -175,22 +189,25 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     }
   };
 
+  // Lida com a mudança no input de arquivo (quando o usuário seleciona um arquivo).
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Se for imagem, lê diretamente.
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (e) => {
         processAndExtract(e.target?.result as string);
       };
       reader.readAsDataURL(file);
+    // Se for PDF, converte para imagem antes de processar.
     } else if (file.type === 'application/pdf') {
       try {
         setIsExtractingPromotion(true);
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-        const page = await pdf.getPage(1); // Process only the first page
+        const page = await pdf.getPage(1); // Processa apenas a primeira página.
         const viewport = page.getViewport({ scale: 1.5 });
         
         const canvas = document.createElement('canvas');
@@ -201,18 +218,16 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
         if (context) {
           await page.render({ canvasContext: context, viewport: viewport }).promise;
           const dataUri = canvas.toDataURL('image/jpeg');
-          processAndExtract(dataUri);
+          processAndExtract(dataUri); // Envia a imagem convertida para a IA.
         } else {
             throw new Error('Could not get canvas context');
         }
-
       } catch (error) {
         toast({
           variant: "destructive",
           title: "Erro ao processar PDF",
-          description: "Não foi possível converter o PDF para imagem. O arquivo pode estar corrompido.",
+          description: "Não foi possível converter o PDF para imagem.",
         });
-        console.error("PDF processing error:", error);
         setIsExtractingPromotion(false);
       }
     } else {
@@ -223,10 +238,10 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
         });
     }
 
-    // Reset file input to allow uploading the same file again
-    event.target.value = '';
+    event.target.value = ''; // Reseta o input de arquivo.
   };
   
+  // Adiciona um item de uma promoção extraída pela IA para a lista de compras.
   const handleAddPromotionToList = (promo: PromotionItem, store?: string) => {
     handleAddItem({
         name: promo.productName,
@@ -239,17 +254,18 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     });
   };
 
+  // Ordena os itens da lista: primeiro por mercado, depois por nome do item.
   const sortedItems = useMemo(() => {
     return [...list.items].sort((a, b) => {
-        // Use a placeholder for undefined/empty stores to group them together
+        // Usa um placeholder para agrupar itens sem mercado no final.
         const storeA = a.store?.trim() || 'zzzz_no_store';
         const storeB = b.store?.trim() || 'zzzz_no_store';
 
-        // Primary sort by store name
+        // Ordenação primária por nome do mercado.
         if (storeA < storeB) return -1;
         if (storeA > storeB) return 1;
 
-        // Secondary sort by item name if stores are the same
+        // Ordenação secundária por nome do item.
         return a.name.localeCompare(b.name);
     });
   }, [list.items]);
@@ -257,6 +273,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      {/* Coluna principal com a lista de compras */}
       <div className="md:col-span-2">
         <Card>
           <CardHeader>
@@ -264,6 +281,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
             <CardDescription>Adicione novos itens e organize sua lista.</CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Formulário para adicionar novos itens */}
             <div className="flex flex-col sm:flex-row gap-2 mb-4">
               <Input
                 value={newItemName}
@@ -288,6 +306,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                 <PlusCircle className="h-4 w-4 mr-2" /> Adicionar
               </Button>
             </div>
+             {/* Tabela de itens da lista */}
              {list.items.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">
                   <Package className="h-12 w-12 mx-auto mb-4" />
@@ -345,6 +364,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
         </Card>
       </div>
 
+      {/* Coluna lateral com as funcionalidades de IA */}
       <div className="space-y-6">
         <Card>
           <CardHeader>
@@ -373,7 +393,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
               )}
               Sugerir itens esquecidos
             </Button>
-
+            {/* Exibe itens sugeridos pela IA */}
             {missingItems.length > 0 && (
               <div className="p-3 bg-muted rounded-lg">
                 <h4 className="font-semibold mb-2 text-sm">Itens sugeridos:</h4>
@@ -391,7 +411,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
               )}
               Melhor preço
             </Button>
-
+            {/* Exibe mercados alternativos sugeridos pela IA */}
             {alternateStores && (
                <div className="p-3 bg-muted rounded-lg">
                 <h4 className="font-semibold mb-2 text-sm">Mercados alternativos:</h4>
@@ -404,6 +424,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
 
           </CardContent>
         </Card>
+        {/* Card para carregar ofertas */}
          <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-headline">
@@ -437,6 +458,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
           </CardContent>
         </Card>
         
+        {/* Diálogo para exibir promoções extraídas */}
         <AlertDialog open={isPromotionDialogOpen} onOpenChange={setIsPromotionDialogOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -476,6 +498,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
             </AlertDialogContent>
         </AlertDialog>
 
+        {/* Diálogo para exibir comparação de preços */}
         <AlertDialog open={isPriceDialogOpen} onOpenChange={setIsPriceDialogOpen}>
           <AlertDialogContent className="max-w-3xl">
             <AlertDialogHeader>

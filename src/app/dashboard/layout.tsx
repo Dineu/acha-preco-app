@@ -33,38 +33,53 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 
+/**
+ * @fileoverview Este é o layout principal para todas as páginas do dashboard.
+ * Ele fornece a estrutura de navegação persistente, como a barra lateral e o cabeçalho.
+ * O conteúdo de cada página específica do dashboard é renderizado através do {children}.
+ */
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [isNewListDialogOpen, setIsNewListDialogOpen] = useState(false);
-  const [newListName, setNewListName] = useState('Compras da Semana');
-  const { toast } = useToast();
   const router = useRouter();
+  const { toast } = useToast();
+
+  // Estado para controlar a abertura do diálogo de criação de nova lista.
+  const [isNewListDialogOpen, setIsNewListDialogOpen] = useState(false);
+  // Estado para armazenar o nome da nova lista.
+  const [newListName, setNewListName] = useState('Compras da Semana');
 
 
+  // Definição dos itens do menu da barra lateral.
   const menuItems = [
     { href: '/dashboard', label: 'Minhas Listas', icon: Home },
     { href: '/dashboard/map', label: 'Mapa de Mercados', icon: Map },
     { href: '/dashboard/test-ai', label: 'Testar IA', icon: FlaskConical },
   ];
 
+  /**
+   * Manipula a submissão do formulário para criar uma nova lista.
+   * Atualmente, apenas simula a criação e exibe uma notificação.
+   * @param {React.FormEvent} e - O evento do formulário.
+   */
   const handleCreateList = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically call an API to create the list
-    console.log('Creating new list:', newListName);
+    // Em um aplicativo real, aqui ocorreria uma chamada de API para salvar a lista no banco de dados.
+    console.log('Criando nova lista:', newListName);
 
     toast({
       title: 'Lista Criada!',
       description: `A lista "${newListName}" foi criada com sucesso.`,
     });
 
-    // We can simulate navigating to the new list in the future
-    // For now, just close the dialog and refresh the dashboard
+    // Fecha o diálogo após a criação.
     setIsNewListDialogOpen(false);
-    // router.push('/dashboard'); // Or navigate to the new list page
+    // Idealmente, o usuário seria redirecionado para a página da nova lista.
+    // router.push('/dashboard/lists/new-list-id');
   };
 
 
   return (
+    // O SidebarProvider gerencia o estado da barra lateral (aberta/fechada).
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
@@ -74,12 +89,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </SidebarHeader>
         <SidebarContent>
+          {/* Renderiza o menu de navegação. */}
           <SidebarMenu>
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <Link href={item.href}>
                   <SidebarMenuButton
-                    isActive={pathname === item.href}
+                    isActive={pathname === item.href} // Destaca o item ativo.
                     tooltip={item.label}
                   >
                     <item.icon />
@@ -91,11 +107,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>
+
+      {/* SidebarInset envolve o conteúdo principal da página. */}
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+          {/* O SidebarTrigger é o botão para abrir/fechar a sidebar em dispositivos móveis. */}
           <SidebarTrigger className="sm:hidden" />
 
           <div className="flex flex-1 items-center justify-end gap-2">
+            {/* Diálogo para criar uma nova lista. */}
              <Dialog open={isNewListDialogOpen} onOpenChange={setIsNewListDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" className="h-8 gap-1">
@@ -133,9 +153,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </form>
               </DialogContent>
             </Dialog>
+
+            {/* Componente de navegação do usuário (avatar, menu de perfil). */}
             <UserNav />
           </div>
         </header>
+
+        {/* O conteúdo da página atual é renderizado aqui. */}
         <main className="p-4 sm:px-6 sm:py-0">{children}</main>
       </SidebarInset>
     </SidebarProvider>
