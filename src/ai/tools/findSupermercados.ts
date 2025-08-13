@@ -1,37 +1,45 @@
 'use server';
 /**
- * @fileOverview A function to find supermarkets using the Google Maps API.
+ * @fileOverview A tool for Genkit to find supermarkets using the Google Maps API.
  *
- * - findSupermarkets - A function that searches for supermarkets in a given city.
+ * - findSupermarketsTool - A Genkit tool that searches for supermarkets in a given city.
  */
 import { searchNearby } from '@/services/google-maps';
+import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-const FindSupermarketsInputSchema = z.object({
-  city: z.string().describe('The city to search for supermarkets in.'),
-});
 
-type FindSupermarketsInput = z.infer<typeof FindSupermarketsInputSchema>;
+export const findSupermarketsTool = ai.defineTool(
+  {
+    name: 'findSupermarkets',
+    description: 'Busca e retorna uma lista de supermercados em uma cidade específica para ajudar a recomendar as melhores opções de compras.',
+    inputSchema: z.object({
+        city: z.string().describe('A cidade onde a busca por supermercados deve ser realizada, por exemplo, "Indaiatuba".'),
+    }),
+    outputSchema: z.object({
+        supermarkets: z.array(z.string()).describe('Uma lista com os nomes dos supermercados encontrados.'),
+    }),
+  },
+  async (input) => {
+    console.log(`[AI Tool] Searching for supermarkets in ${input.city}`);
+    
+    // A simplified, broad query for major supermarket types.
+    const query = `supermercado em ${input.city}`;
 
-export async function findSupermarkets(input: FindSupermarketsInput) {
-  console.log(`Searching for supermarkets in ${input.city}`);
-  // A simplified, broad query for major supermarket types.
-  const query = `supermarket in ${input.city}`;
+    try {
+      // The searchNearby function needs to be implemented or updated to handle this query.
+      const results = await searchNearby(query, input.city);
+      const names = results.map((place) => place.name).filter((name): name is string => !!name);
 
-  try {
-    // The searchNearby function needs to be implemented or updated to handle this query.
-    // For now, we assume it exists and works as intended.
-    const results = await searchNearby(query, 'supermarket');
-    const names = results.map((place) => place.name).filter((name): name is string => !!name);
+      // Remove duplicates
+      const uniqueNames = [...new Set(names)];
 
-    // Remove duplicates
-    const uniqueNames = [...new Set(names)];
-
-    console.log(`Found ${uniqueNames.length} unique supermarkets.`);
-    return { supermarkets: uniqueNames };
-  } catch (error) {
-    console.error('Error in findSupermarketsTool:', error);
-    // Return an empty list in case of an error to avoid breaking the flow.
-    return { supermarkets: [] };
+      console.log(`[AI Tool] Found ${uniqueNames.length} unique supermarkets.`);
+      return { supermarkets: uniqueNames };
+    } catch (error) {
+      console.error('Error in findSupermarketsTool:', error);
+      // Return an empty list in case of an error to avoid breaking the flow.
+      return { supermarkets: [] };
+    }
   }
-}
+);

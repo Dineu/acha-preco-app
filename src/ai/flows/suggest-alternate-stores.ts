@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { findSupermarketsTool } from '@/ai/tools/findSupermercados';
 
 const SuggestAlternateStoresInputSchema = z.object({
   shoppingList: z
@@ -37,15 +38,16 @@ const prompt = ai.definePrompt({
   name: 'suggestAlternateStoresPrompt',
   input: {schema: SuggestAlternateStoresInputSchema},
   output: {schema: SuggestAlternateStoresOutputSchema},
+  tools: [findSupermarketsTool],
   prompt: `Você é um assistente de compras especialista na cidade de Indaiatuba, São Paulo. Dada uma lista de itens e a loja atual que um usuário está considerando, sugira lojas alternativas que possam ter preços melhores para os itens da lista.
 
 Lista de itens: {{shoppingList}}
 Loja atual: {{currentStore}}
 
 INSTRUÇÕES IMPORTANTES:
-1.  **Foco em Indaiatuba:** Considere apenas os seguintes supermercados que são os principais da cidade: Atacadão, Assaí Atacadista, Roldão Atacadista, Sonda Supermercados, Supermercado Sumerbol, Supermercados Pague Menos, Supermercado GoodBom, Pão de Açúcar, Covabra Supermercados, MonteKali Supermercado.
+1.  **Use a Ferramenta findSupermarkets**: Antes de responder, use a ferramenta 'findSupermarkets' para obter a lista mais atualizada de supermercados na cidade de "Indaiatuba". Baseie suas sugestões APENAS nos resultados dessa ferramenta.
 2.  **Preços Competitivos:** Lembre-se que "Atacadão", "Assaí Atacadista" e "Roldão Atacadista" são "atacarejos", e geralmente possuem preços mais baixos, especialmente para compras maiores.
-3.  **Não invente lojas:** Não sugira lojas que não estão na lista acima. O supermercado "Paulistão" não existe mais na cidade.
+3.  **Não invente lojas:** Não sugira lojas que não foram retornadas pela ferramenta.
 
 Responda com uma lista de lojas alternativas e uma breve explicação do motivo pelo qual você as está sugerindo. A resposta deve ser em português.`,
 });
