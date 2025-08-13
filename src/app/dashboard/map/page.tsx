@@ -135,7 +135,8 @@ function MapPageContent() {
         "Roldão Atacadista em Indaiatuba",
         "Pão de Açúcar em Indaiatuba",
         "MonteKali Supermercado em Indaiatuba",
-        "Cato Supermercados em Indaiatuba"
+        "Cato Supermercados em Indaiatuba",
+        "Pistoni Supermercados em Indaiatuba"
     ];
   
     try {
@@ -239,58 +240,68 @@ function MapPageContent() {
   }
   
    return (
-    <div className="relative">
-       <AlertDialog open={isListDialogOpen} onOpenChange={setIsListDialogOpen}>
-        <AlertDialogTrigger asChild>
-          <div className="absolute top-4 right-4 z-10">
-            <Button onClick={handleOpenMarketList} disabled={isLoading}>
-              {isLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <List className="mr-2 h-4 w-4" />
-              )}
-              Listar Supermercados
-            </Button>
+    <>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="font-headline text-2xl">Mapa Interativo</CardTitle>
+            <CardDescription>
+              Localize os principais mercados e suas promoções, obtidos em tempo real.
+            </CardDescription>
           </div>
-        </AlertDialogTrigger>
-         <AlertDialogContent>
-           <AlertDialogHeader>
-             <AlertDialogTitle>Supermercados Encontrados em Indaiatuba</AlertDialogTitle>
-             <AlertDialogDescription>
-               Clique em um supermercado para vê-lo no mapa.
-             </AlertDialogDescription>
-           </AlertDialogHeader>
-           <div className="max-h-60 overflow-y-auto">
-             <ul className="space-y-1">
-               {marketList.map((market) => (
-                 <li key={market.id}>
-                    <Button 
-                     variant="link" 
-                     className="p-0 h-auto text-card-foreground"
-                     onClick={() => {
-                       setSelectedMarket(market);
-                       setIsListDialogOpen(false);
-                     }}
-                   >
-                     {market.name}
-                   </Button>
-                 </li>
-               ))}
-             </ul>
-           </div>
-           <AlertDialogFooter>
-             <AlertDialogAction onClick={() => setIsListDialogOpen(false)}>Fechar</AlertDialogAction>
-           </AlertDialogFooter>
-         </AlertDialogContent>
-       </AlertDialog>
-      <SupermarketMap 
-        markets={marketList} 
-        isLoading={isLoading}
-        error={error}
-        selectedMarket={selectedMarket}
-        onMarkerClick={handleMarkerClick}
-      />
-    </div>
+           <AlertDialog open={isListDialogOpen} onOpenChange={setIsListDialogOpen}>
+            <AlertDialogTrigger asChild>
+                <Button onClick={handleOpenMarketList} disabled={isLoading}>
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <List className="mr-2 h-4 w-4" />
+                  )}
+                  Listar Supermercados
+                </Button>
+            </AlertDialogTrigger>
+             <AlertDialogContent>
+               <AlertDialogHeader>
+                 <AlertDialogTitle>Supermercados Encontrados em Indaiatuba</AlertDialogTitle>
+                 <AlertDialogDescription>
+                   Clique em um supermercado para vê-lo no mapa.
+                 </AlertDialogDescription>
+               </AlertDialogHeader>
+               <div className="max-h-60 overflow-y-auto">
+                 <ul className="space-y-1">
+                   {marketList.map((market) => (
+                     <li key={market.id}>
+                        <Button 
+                         variant="link" 
+                         className="p-0 h-auto text-card-foreground"
+                         onClick={() => {
+                           setSelectedMarket(market);
+                           setIsListDialogOpen(false);
+                         }}
+                       >
+                         {market.name}
+                       </Button>
+                     </li>
+                   ))}
+                 </ul>
+               </div>
+               <AlertDialogFooter>
+                 <AlertDialogAction onClick={() => setIsListDialogOpen(false)}>Fechar</AlertDialogAction>
+               </AlertDialogFooter>
+             </AlertDialogContent>
+           </AlertDialog>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <SupermarketMap 
+          markets={marketList} 
+          isLoading={isLoading}
+          error={error}
+          selectedMarket={selectedMarket}
+          onMarkerClick={handleMarkerClick}
+        />
+      </CardContent>
+    </>
   );
 }
 
@@ -342,17 +353,11 @@ export default function MapPage() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="font-headline text-2xl">Mapa Interativo</CardTitle>
-        <CardDescription>
-          Localize os principais mercados e suas promoções, obtidos em tempo real.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <APIProvider apiKey={apiKey} libraries={['places']}>
-           <MapPageContent />
-        </APIProvider>
-      </CardContent>
+      <APIProvider apiKey={apiKey} libraries={['places']}>
+          <MapPageContent />
+      </APIProvider>
     </Card>
   );
 }
+
+    
