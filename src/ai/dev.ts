@@ -8,4 +8,4 @@ import '@/ai/tools/findSupermercados.ts';
 // import '@/ai/flows/suggest-alternate-stores.ts';
 // import '@/ai/flows/suggest-missing-items.ts';
 // import '@/ai/flows/extract-promotion-details.ts';
-// import '@/ai/flows/test-ai-flow.ts';
+import '@/ai/flows/test-ai-flow.ts';
