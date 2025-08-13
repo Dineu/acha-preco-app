@@ -78,6 +78,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     setMissingItems([]);
     try {
       const existingItems = list.items.map(item => item.name);
+      console.log('[CLIENT] Enviando para a IA para sugerir itens:', { existingItems });
       const result = await suggestMissingItems({ existingItems });
       setMissingItems(result.suggestedItems);
     } catch (error) {
@@ -96,8 +97,8 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     setAlternateStores(null);
     try {
       const shoppingList = list.items.map(item => item.name);
-      // Assuming a default current store for the example
       const currentStore = "Carrefour"; 
+      console.log('[CLIENT] Enviando para a IA para sugerir mercados:', { shoppingList, currentStore });
       const result = await suggestAlternateStores({ shoppingList, currentStore });
       setAlternateStores({ stores: result.alternateStores, reasoning: result.reasoning });
     } catch (error) {
