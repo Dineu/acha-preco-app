@@ -1,3 +1,5 @@
+'use server';
+
 import { config } from 'dotenv';
 config();
 
@@ -5,3 +7,4 @@ config();
 import '@/ai/flows/suggest-alternate-stores.ts';
 import '@/ai/flows/suggest-missing-items.ts';
 import '@/ai/flows/extract-promotion-details.ts';
+import '@/ai/flows/price-comparison-flow.ts';

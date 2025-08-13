@@ -14,11 +14,13 @@ import {
   PlusCircle,
   Upload,
   Loader2,
+  Tags,
 } from 'lucide-react';
-import { suggestMissingItems, suggestAlternateStores, extractPromotionDetails } from '@/lib/actions';
+import { suggestMissingItems, suggestAlternateStores, extractPromotionDetails, comparePrices } from '@/lib/actions';
 import type { ExtractPromotionDetailsOutput } from '@/ai/flows/extract-promotion-details';
+import type { ComparePricesOutput } from '@/ai/flows/price-comparison-flow';
 import { useToast } from '@/hooks/use-toast';
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Set up the worker for pdfjs
@@ -35,6 +37,9 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
   const [isSuggestingItems, setIsSuggestingItems] = useState(false);
   const [isSuggestingStores, setIsSuggestingStores] = useState(false);
   const [isExtractingPromotion, setIsExtractingPromotion] = useState(false);
+  const [isComparingPrices, setIsComparingPrices] = useState(false);
+  const [priceComparisonResult, setPriceComparisonResult] = useState<ComparePricesOutput | null>(null);
+  const [isPriceDialogOpen, setIsPriceDialogOpen] = useState(false);
   const [extractedPromotion, setExtractedPromotion] = useState<ExtractPromotionDetailsOutput | null>(null)
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false);
 
@@ -111,6 +116,27 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
       setIsSuggestingStores(false);
     }
   };
+
+  const handleComparePrices = async () => {
+    setIsComparingPrices(true);
+    setPriceComparisonResult(null);
+    try {
+      const shoppingList = list.items.map(item => item.name);
+      console.log('[CLIENT] Enviando para a IA para comparar preços:', { shoppingList });
+      const result = await comparePrices({ shoppingList, city: 'Indaiatuba' });
+      setPriceComparisonResult(result);
+      setIsPriceDialogOpen(true);
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Erro ao Comparar Preços",
+            description: error.message || "Não foi possível obter a comparação de preços.",
+        });
+    } finally {
+        setIsComparingPrices(false);
+    }
+  };
+
 
   const handleUploadButtonClick = () => {
     fileInputRef.current?.click();
@@ -259,6 +285,15 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
+            <Button variant="outline" className="w-full" onClick={handleComparePrices} disabled={isComparingPrices || list.items.length === 0}>
+                {isComparingPrices ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Tags className="mr-2 h-4 w-4" />
+                )}
+                Comparar Preços
+            </Button>
+
             <Button variant="secondary" className="w-full" onClick={handleSuggestMissingItems} disabled={isSuggestingItems}>
               {isSuggestingItems ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -359,6 +394,29 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
               </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+
+        <AlertDialog open={isPriceDialogOpen} onOpenChange={setIsPriceDialogOpen}>
+          <AlertDialogContent className="max-w-3xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Comparativo de Preços</AlertDialogTitle>
+              <AlertDialogDescription>
+                A IA estimou os preços da sua lista nos supermercados da região.
+                {priceComparisonResult?.recommendation}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            {priceComparisonResult && (
+              <div className="max-h-[60vh] overflow-y-auto text-sm border-t pt-4 mt-2">
+                <pre className="text-sm font-mono whitespace-pre-wrap bg-muted p-4 rounded-md">
+                  {priceComparisonResult.priceTable}
+                </pre>
+              </div>
+            )}
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setIsPriceDialogOpen(false)}>Entendi</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
 
       </div>
     </div>

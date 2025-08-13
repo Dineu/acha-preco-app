@@ -15,6 +15,11 @@ import {
   ExtractPromotionDetailsInput,
   ExtractPromotionDetailsOutput,
 } from '@/ai/flows/extract-promotion-details';
+import {
+    comparePrices as comparePricesFlow,
+    ComparePricesInput,
+    ComparePricesOutput,
+} from '@/ai/flows/price-comparison-flow';
 
 
 export async function suggestMissingItems(input: SuggestMissingItemsInput): Promise<SuggestMissingItemsOutput> {
@@ -52,4 +57,17 @@ export async function extractPromotionDetails(input: ExtractPromotionDetailsInpu
     console.error('[Action] Erro em extractPromotionDetails:', error);
     throw new Error(`Falha ao extrair detalhes da promoção: ${error.message}`);
   }
+}
+
+
+export async function comparePrices(input: ComparePricesInput): Promise<ComparePricesOutput> {
+    console.log('[Action] Iniciando comparePrices com input:', input);
+    try {
+      const result = await comparePricesFlow(input);
+      console.log('[Action] comparePrices concluído com sucesso.');
+      return result;
+    } catch (error: any) {
+      console.error('[Action] Erro em comparePrices:', error);
+      throw new Error(`Falha ao comparar preços: ${error.message}`);
+    }
 }
