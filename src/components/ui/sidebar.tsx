@@ -115,7 +115,7 @@ const SidebarProvider = React.forwardRef<
     // We use openProp and setOpenProp for control from outside the component.
     const [_open, _setOpen] = React.useState(defaultOpen)
     
-    // For desktop, we force the sidebar to be always open.
+    // On desktop, the sidebar is always expanded. On mobile, its state is controlled.
     const open = isMobile ? (openProp ?? _open) : true;
 
     const setOpen = React.useCallback(
@@ -250,7 +250,11 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className="group peer hidden md:block text-sidebar-foreground"
+        className={cn(
+          "group peer md:flex text-sidebar-foreground",
+          // This ensures the sidebar is not hidden on desktop
+          "hidden"
+        )}
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -298,27 +302,22 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar, isMobile } = useSidebar()
+  const { toggleSidebar, isMobile, openMobile } = useSidebar()
 
-  // Only render the trigger on mobile.
-  if (!isMobile) {
-    return null;
-  }
-  
   return (
     <Button
       ref={ref}
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn("h-7 w-7", isMobile ? "flex" : "hidden", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
       }}
       {...props}
     >
-      <PanelLeft />
+      {openMobile ? <IconClose /> : <IconOpen />}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
@@ -329,7 +328,11 @@ const SidebarRail = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
 >(({ className, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, isMobile } = useSidebar()
+
+   if (isMobile) {
+    return null;
+  }
 
   return (
     <button
