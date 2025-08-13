@@ -70,7 +70,7 @@ const ComparePricesOutputSchema = z.object({
     .describe('A Markdown formatted table comparing the prices of each item across different supermarkets.'),
   recommendation: z
     .string()
-    .describe('A brief recommendation on where to shop for the best value.'),
+    .describe('Uma recomendação sobre onde comprar para obter o melhor valor, incluindo um aviso de que os preços são estimativas.'),
 });
 export type ComparePricesOutput = z.infer<typeof ComparePricesOutputSchema>;
 
@@ -98,7 +98,7 @@ INSTRUÇÕES:
 1.  **Selecione os Supermercados**: Use a ferramenta 'findSupermarkets' para a cidade de "{{city}}". Independentemente dos resultados da ferramenta, faça a comparação **APENAS** entre os supermercados "Assaí Atacadista" e "Pague Menos".
 2.  **Estime os Preços**: Para cada item da lista, estime o preço em cada um dos dois supermercados selecionados. Baseie suas estimativas no seu conhecimento geral de preços e no perfil de cada loja (ex: Assaí é um atacarejo e geralmente mais barato em itens básicos e em quantidade. Pague Menos é um varejo tradicional com preços intermediários).
 3.  **Crie a Tabela**: Formate a saída como uma tabela em Markdown. A primeira coluna deve ser o nome do produto. As colunas seguintes devem ser os supermercados. A última linha da tabela deve ser o "Total" estimado para a soma dos itens em cada supermercado. **NUNCA inclua uma coluna de "Total" no final da tabela (na vertical).**
-4.  **Crie a Recomendação**: Com base na tabela, forneça uma recomendação curta e objetiva sobre qual supermercado (ou combinação) oferece o melhor custo-benefício para essa lista específica.
+4.  **Crie a Recomendação**: Com base na tabela, forneça uma recomendação curta e objetiva sobre qual supermercado (ou combinação) oferece o melhor custo-benefício. **MUITO IMPORTANTE: No final da recomendação, inclua a seguinte frase: "Atenção: os preços são estimativas e podem variar na loja."**
 
 Se a ferramenta não retornar nenhum supermercado, informe que não é possível fazer a comparação.
 A resposta deve ser em português.`,
