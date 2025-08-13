@@ -12,9 +12,12 @@ import { notFound } from 'next/navigation';
 // Função auxiliar para buscar a lista.
 // Em uma aplicação real, isso seria uma chamada ao banco de dados (ex: Firestore).
 async function getList(id: string) {
-  // O método `find` é síncrono, então o envolvemos em uma Promise resolvida
-  // para simular o comportamento assíncrono de uma busca em banco de dados.
-  return Promise.resolve(mockShoppingLists.find((l) => l.id === id));
+  // Envolvemos a busca em uma Promise para garantir um comportamento assíncrono.
+  // Isso ajuda a evitar problemas de compilação com o Next.js (Turbopack).
+  return new Promise((resolve) => {
+    const list = mockShoppingLists.find((l) => l.id === id);
+    resolve(list);
+  });
 }
 
 // O componente da página em si. É uma função assíncrona porque precisa esperar pelos dados.
