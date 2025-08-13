@@ -50,7 +50,7 @@ export async function extractPromotionDetails(input: ExtractPromotionDetailsInpu
 
 const prompt = ai.definePrompt({
     name: 'extractPromotionDetailsPrompt',
-    model: 'gemini-1.5-flash',
+    model: 'googleai/gemini-1.5-flash',
     input: {schema: ExtractPromotionDetailsInputSchema},
     output: {schema: ExtractPromotionDetailsOutputSchema},
     prompt: `You are an expert at extracting information from images of supermarket promotions flyers.
