@@ -8,19 +8,8 @@
  * - SuggestMissingItemsOutput - The return type for the suggestMissingItems function.
  */
 
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import { ai } from '@/ai/genkit';
 import {z} from 'genkit';
-
-const ai = genkit({
-  plugins: [
-    googleAI({
-      apiKey: process.env.GEMINI_API_KEY,
-    }),
-  ],
-  logLevel: 'debug',
-  enableTracingAndMetrics: true,
-});
 
 const SuggestMissingItemsInputSchema = z.object({
   existingItems: z
