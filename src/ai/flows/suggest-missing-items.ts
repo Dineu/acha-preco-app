@@ -48,6 +48,7 @@ const suggestMissingItemsFlow = ai.defineFlow(
     outputSchema: SuggestMissingItemsOutputSchema,
   },
   async input => {
+    console.log('[AI Flow] suggestMissingItemsFlow recebido. Itens existentes:', input.existingItems);
     const {output} = await prompt(input);
     return output!;
   }

@@ -59,6 +59,7 @@ const suggestAlternateStoresFlow = ai.defineFlow(
     outputSchema: SuggestAlternateStoresOutputSchema,
   },
   async input => {
+    console.log('[AI Flow] suggestAlternateStoresFlow recebido. Lista de compras:', input.shoppingList);
     const {output} = await prompt(input);
     return output!;
   }
