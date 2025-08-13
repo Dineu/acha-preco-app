@@ -33,7 +33,7 @@ const findSupermarketsTool = ai.defineTool(
         city: z.string().describe('A cidade onde a busca por supermercados deve ser realizada, por exemplo, "Indaiatuba".'),
     }),
     outputSchema: z.object({
-        supermarkets: z.array(z.string()).describe('Uma lista com os nomes dos supermercados encontrados.'),
+        supermercados: z.array(z.string()).describe('Uma lista com os nomes dos supermercados encontrados.'),
     }),
   },
   async (input) => {
@@ -48,10 +48,10 @@ const findSupermarketsTool = ai.defineTool(
       const uniqueNames = [...new Set(names)];
 
       console.log(`[AI Tool] Encontrados ${uniqueNames.length} supermercados únicos. Lista:`, uniqueNames);
-      return { supermarkets: uniqueNames };
+      return { supermercados: uniqueNames };
     } catch (error) {
       console.error('[AI Tool] Erro dentro da ferramenta findSupermarketsTool:', error);
-      return { supermarkets: [] };
+      return { supermercados: [] };
     }
   }
 );
@@ -62,6 +62,7 @@ const SuggestAlternateStoresInputSchema = z.object({
     .array(z.string())
     .describe('The list of items to buy.'),
   currentStore: z.string().describe('The store the user is currently considering.'),
+  city: z.string().describe('The city where the user is located.'),
 });
 export type SuggestAlternateStoresInput = z.infer<typeof SuggestAlternateStoresInputSchema>;
 
@@ -91,7 +92,7 @@ Lista de itens: {{shoppingList}}
 Loja atual: {{currentStore}}
 
 INSTRUÇÕES IMPORTANTES:
-1.  **Use a Ferramenta findSupermarkets**: Antes de responder, use a ferramenta 'findSupermarkets' para obter a lista mais atualizada de supermercados na cidade de "Indaiatuba". Baseie suas sugestões APENAS nos resultados dessa ferramenta.
+1.  **Use a Ferramenta findSupermarkets**: Antes de responder, use a ferramenta 'findSupermarkets' para a cidade de "{{city}}". Baseie suas sugestões APENAS nos resultados dessa ferramenta. Se a ferramenta não retornar supermercados, informe ao usuário que não foi possível encontrar lojas e que, por isso, não pode fazer sugestões.
 2.  **Preços Competitivos:** Lembre-se que "Atacadão", "Assaí Atacadista" e "Roldão Atacadista" são "atacarejos", e geralmente possuem preços mais baixos, especialmente para compras maiores.
 3.  **Não invente lojas:** Não sugira lojas que não foram retornadas pela ferramenta.
 

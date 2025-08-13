@@ -105,8 +105,9 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     try {
       const shoppingList = list.items.map(item => item.name);
       const currentStore = "Carrefour"; 
-      console.log('[CLIENT] Enviando para a IA para sugerir mercados:', { shoppingList, currentStore });
-      const result = await suggestAlternateStores({ shoppingList, currentStore });
+      const city = "Indaiatuba";
+      console.log('[CLIENT] Enviando para a IA para sugerir mercados:', { shoppingList, currentStore, city });
+      const result = await suggestAlternateStores({ shoppingList, currentStore, city });
       setAlternateStores({ stores: result.alternateStores, reasoning: result.reasoning });
     } catch (error) {
       toast({
