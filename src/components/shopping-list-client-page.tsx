@@ -249,6 +249,13 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
         }
         grouped[storeName].push(item);
     });
+
+    // Sort items within each group alphabetically by name
+    for (const storeName in grouped) {
+        grouped[storeName].sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    // Sort store groups alphabetically
     return Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b));
   }, [list.items]);
 
