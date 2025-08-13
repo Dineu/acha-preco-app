@@ -12,12 +12,12 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
-      {/* Lupa (parte externa) */}
-      <circle cx="11" cy="11" r="8" className="text-primary" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" className="text-primary" />
+      {/* Lupa (parte externa) - Aumentada */}
+      <circle cx="10" cy="10" r="9" className="text-primary" />
+      <line x1="18" y1="18" x2="22" y2="22" className="text-primary" />
       
       {/* Carrinho de Compras (dentro da lupa) */}
-      <g className="stroke-primary-foreground" transform="translate(1, 1) scale(0.8)">
+      <g className="stroke-primary-foreground" transform="translate(2, 2) scale(0.7)">
         <circle cx="9" cy="21" r="1" />
         <circle cx="20" cy="21" r="1" />
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
