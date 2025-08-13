@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 
 const ExtractPromotionDetailsInputSchema = z.object({
   photoDataUri: z
@@ -39,6 +40,7 @@ export async function extractPromotionDetails(input: ExtractPromotionDetailsInpu
 
 const prompt = ai.definePrompt({
     name: 'extractPromotionDetailsPrompt',
+    model: googleAI.model('gemini-1.5-pro-preview'),
     input: {schema: ExtractPromotionDetailsInputSchema},
     output: {schema: ExtractPromotionDetailsOutputSchema},
     prompt: `You are an expert at extracting information from images of supermarket promotions flyers.
