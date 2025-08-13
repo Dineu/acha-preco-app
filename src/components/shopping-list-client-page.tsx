@@ -25,7 +25,6 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import * as pdfjsLib from 'pdfjs-dist';
 import { MarkdownTable } from './markdown-table';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 // Set up the worker for pdfjs
 if (typeof window !== 'undefined') {
@@ -240,23 +239,19 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
     });
   };
 
-  const groupedItems = useMemo(() => {
-    const grouped: { [store: string]: Item[] } = {};
-    list.items.forEach(item => {
-        const storeName = item.store || 'Outros'; 
-        if (!grouped[storeName]) {
-            grouped[storeName] = [];
-        }
-        grouped[storeName].push(item);
+  const sortedItems = useMemo(() => {
+    return [...list.items].sort((a, b) => {
+        // Use a placeholder for undefined/empty stores to group them together
+        const storeA = a.store?.trim() || 'zzzz_no_store';
+        const storeB = b.store?.trim() || 'zzzz_no_store';
+
+        // Primary sort by store name
+        if (storeA < storeB) return -1;
+        if (storeA > storeB) return 1;
+
+        // Secondary sort by item name if stores are the same
+        return a.name.localeCompare(b.name);
     });
-
-    // Sort items within each group alphabetically by name
-    for (const storeName in grouped) {
-        grouped[storeName].sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    // Sort store groups alphabetically
-    return Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b));
   }, [list.items]);
 
 
@@ -266,7 +261,7 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">{list.name}</CardTitle>
-            <CardDescription>Adicione novos itens e organize sua lista por mercado.</CardDescription>
+            <CardDescription>Adicione novos itens e organize sua lista.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-2 mb-4">
@@ -300,58 +295,51 @@ export default function ShoppingListClientPage({ initialList }: { initialList: S
                   <p>Adicione itens acima para começar.</p>
                 </div>
             ) : (
-                <Accordion type="multiple" defaultValue={groupedItems.map(([storeName]) => storeName)} className="w-full">
-                    {groupedItems.map(([storeName, items]) => (
-                        <AccordionItem value={storeName} key={storeName}>
-                            <AccordionTrigger className="font-bold text-lg">
-                                {storeName} ({items.length})
-                            </AccordionTrigger>
-                            <AccordionContent>
-                                <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-[50px]">OK</TableHead>
-                                                <TableHead>Item</TableHead>
-                                                <TableHead className="text-right">Preço</TableHead>
-                                                <TableHead className="w-[50px] text-right">Ações</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                        {items.map((item) => (
-                                            <TableRow key={item.id}>
-                                            <TableCell>
-                                                <Checkbox
-                                                checked={item.checked}
-                                                onCheckedChange={() => handleToggleItem(item.id)}
-                                                aria-label={`Marcar ${item.name} como comprado`}
-                                                />
-                                            </TableCell>
-                                            <TableCell className={`font-medium ${item.checked ? 'line-through text-muted-foreground' : ''}`}>
-                                                {item.name}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                {item.price ? `R$ ${item.price.toFixed(2)}` : '-'}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => handleRemoveItem(item.id)}
-                                                >
-                                                <Trash2 className="h-4 w-4" />
-                                                <span className="sr-only">Remover item</span>
-                                                </Button>
-                                            </TableCell>
-                                            </TableRow>
-                                        ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                </Accordion>
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[50px]">OK</TableHead>
+                                <TableHead>Item</TableHead>
+                                <TableHead>Mercado</TableHead>
+                                <TableHead className="text-right">Preço</TableHead>
+                                <TableHead className="w-[50px] text-right">Ações</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {sortedItems.map((item) => (
+                            <TableRow key={item.id}>
+                            <TableCell>
+                                <Checkbox
+                                checked={item.checked}
+                                onCheckedChange={() => handleToggleItem(item.id)}
+                                aria-label={`Marcar ${item.name} como comprado`}
+                                />
+                            </TableCell>
+                            <TableCell className={`font-medium ${item.checked ? 'line-through text-muted-foreground' : ''}`}>
+                                {item.name}
+                            </TableCell>
+                            <TableCell className={`${item.checked ? 'line-through text-muted-foreground' : ''}`}>
+                                {item.store || '-'}
+                            </TableCell>
+                            <TableCell className="text-right">
+                                {item.price ? `R$ ${item.price.toFixed(2)}` : '-'}
+                            </TableCell>
+                            <TableCell className="text-right">
+                                <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemoveItem(item.id)}
+                                >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Remover item</span>
+                                </Button>
+                            </TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
+                </div>
             )}
           </CardContent>
         </Card>
