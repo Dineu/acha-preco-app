@@ -15,10 +15,6 @@ import {
   ExtractPromotionDetailsInput,
   ExtractPromotionDetailsOutput,
 } from '@/ai/flows/extract-promotion-details';
-import {
-  testAi as testAiFlow,
-  TestAiOutput,
-} from '@/ai/flows/test-ai-flow';
 
 
 export async function suggestMissingItems(input: SuggestMissingItemsInput): Promise<SuggestMissingItemsOutput> {
@@ -55,17 +51,5 @@ export async function extractPromotionDetails(input: ExtractPromotionDetailsInpu
   } catch (error) {
     console.error('[Action] Erro em extractPromotionDetails:', error);
     throw new Error('Falha ao extrair detalhes da promoção.');
-  }
-}
-
-export async function testAi(): Promise<TestAiOutput> {
-  console.log('[Action] Iniciando testAi.');
-  try {
-    const result = await testAiFlow();
-    console.log('[Action] testAi concluído com sucesso. Resultado:', result);
-    return result;
-  } catch (error) {
-    console.error('[Action] Erro em testAi:', error);
-    throw new Error('Falha ao testar a conexão com a IA.');
   }
 }

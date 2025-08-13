@@ -8,7 +8,7 @@
  * - SuggestAlternateStoresOutput - The return type for the suggestAlternateStores function.
  */
 
-import {ai} from '@/ai/init';
+import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { findSupermarketsTool } from '@/ai/tools/findSupermercados';
 

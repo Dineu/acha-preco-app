@@ -5,7 +5,7 @@
  * - findSupermarketsTool - A Genkit tool that searches for supermarkets in a given city.
  */
 import { searchNearby } from '@/services/google-maps';
-import { ai } from '@/ai/init';
+import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 
