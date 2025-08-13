@@ -68,6 +68,7 @@ export async function searchNearby(query: string, location: string): Promise<Par
         "Roldão Atacadista em Indaiatuba",
         "Pão de Açúcar em Indaiatuba",
         "OBA Hortifruti em Indaiatuba",
+        "Carrefour em Indaiatuba",
         // Add smaller or local markets as well
         "MonteKali Supermercado em Indaiatuba",
         "Cato Supermercados em Indaiatuba",

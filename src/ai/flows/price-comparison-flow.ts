@@ -32,7 +32,7 @@ const findSupermarketsTool = ai.defineTool(
         city: z.string().describe('A cidade onde a busca por supermercados deve ser realizada, por exemplo, "Indaiatuba".'),
     }),
     outputSchema: z.object({
-        supermarkets: z.array(z.string()).describe('Uma lista com os nomes dos supermercados encontrados.'),
+        supermercados: z.array(z.string()).describe('Uma lista com os nomes dos supermercados encontrados.'),
     }),
   },
   async (input) => {
@@ -95,9 +95,9 @@ Lista de Compras:
 {{/each}}
 
 INSTRUÇÕES:
-1.  **Obtenha a Lista de Supermercados**: Use a ferramenta 'findSupermarkets' para a cidade de "{{city}}" para obter a lista de supermercados a serem comparados. Use no máximo 5 supermercados da lista, priorizando uma mistura de atacarejos e varejos.
+1.  **Obtenha a Lista de Supermercados**: Use a ferramenta 'findSupermarkets' para a cidade de "{{city}}" para obter a lista de supermercados a serem comparados. Use no máximo 7 supermercados da lista, priorizando uma mistura de atacarejos e varejos.
 2.  **Estime os Preços**: Para cada item da lista, estime o preço em cada um dos supermercados selecionados. Baseie suas estimativas no seu conhecimento geral de preços e no perfil de cada loja (ex: Atacadão, Assaí e Roldão são atacarejos e geralmente mais baratos em itens básicos e em quantidade. Pão de Açúcar é um varejo premium com preços mais altos. Sumerbol, Pague Menos, GoodBom e Sonda são varejos tradicionais com preços intermediários).
-3.  **Crie a Tabela**: Formate a saída como uma tabela em Markdown. A primeira coluna deve ser o nome do produto. As colunas seguintes devem ser os supermercados. NÃO inclua uma coluna "Total" no final. A última linha da tabela deve ser o "Total" estimado para a soma dos itens em cada supermercado.
+3.  **Crie a Tabela**: Formate a saída como uma tabela em Markdown. A primeira coluna deve ser o nome do produto. As colunas seguintes devem ser os supermercados. A última linha da tabela deve ser o "Total" estimado para a soma dos itens em cada supermercado. **NUNCA inclua uma coluna de "Total" no final da tabela.**
 4.  **Crie a Recomendação**: Com base na tabela, forneça uma recomendação curta e objetiva sobre qual supermercado (ou combinação de supermercados) oferece o melhor custo-benefício para essa lista específica.
 
 Se a ferramenta não retornar nenhum supermercado, informe que não é possível fazer a comparação.
