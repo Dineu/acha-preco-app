@@ -18,31 +18,38 @@ import {
 
 
 export async function suggestMissingItems(input: SuggestMissingItemsInput): Promise<SuggestMissingItemsOutput> {
+  console.log('[Action] Iniciando suggestMissingItems com input:', input);
   try {
     const result = await suggestMissingItemsFlow(input);
+    console.log('[Action] suggestMissingItems concluído com sucesso. Resultado:', result);
     return result;
   } catch (error) {
-    console.error('Error suggesting missing items:', error);
-    throw new Error('Failed to get suggestions.');
+    console.error('[Action] Erro em suggestMissingItems:', error);
+    throw new Error('Falha ao obter sugestões de itens.');
   }
 }
 
 export async function suggestAlternateStores(input: SuggestAlternateStoresInput): Promise<SuggestAlternateStoresOutput> {
+  console.log('[Action] Iniciando suggestAlternateStores com input:', input);
   try {
     const result = await suggestAlternateStoresFlow(input);
+    console.log('[Action] suggestAlternateStores concluído com sucesso. Resultado:', result);
     return result;
   } catch (error) {
-    console.error('Error suggesting alternate stores:', error);
-    throw new Error('Failed to get store suggestions.');
+    console.error('[Action] Erro em suggestAlternateStores:', error);
+    throw new Error('Falha ao obter sugestões de lojas.');
   }
 }
 
 export async function extractPromotionDetails(input: ExtractPromotionDetailsInput): Promise<ExtractPromotionDetailsOutput> {
+  // Não logar o input aqui pois ele contém a imagem inteira em base64, o que poluiria o log.
+  console.log('[Action] Iniciando extractPromotionDetails.');
   try {
     const result = await extractPromotionDetailsFlow(input);
+    console.log('[Action] extractPromotionDetails concluído com sucesso. Resultado:', result);
     return result;
   } catch (error) {
-    console.error('Error extracting promotion details:', error);
-    throw new Error('Failed to extract promotion details.');
+    console.error('[Action] Erro em extractPromotionDetails:', error);
+    throw new Error('Falha ao extrair detalhes da promoção.');
   }
 }

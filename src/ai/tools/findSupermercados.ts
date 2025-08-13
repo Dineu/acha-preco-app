@@ -21,10 +21,11 @@ export const findSupermarketsTool = ai.defineTool(
     }),
   },
   async (input) => {
-    console.log(`[AI Tool] Searching for supermarkets in ${input.city}`);
+    console.log(`[AI Tool] A ferramenta findSupermarkets foi chamada com a cidade: ${input.city}`);
     
     // A simplified, broad query for major supermarket types.
     const query = `supermercado em ${input.city}`;
+    console.log(`[AI Tool] Montando a query para a busca: "${query}"`);
 
     try {
       // The searchNearby function needs to be implemented or updated to handle this query.
@@ -34,10 +35,10 @@ export const findSupermarketsTool = ai.defineTool(
       // Remove duplicates
       const uniqueNames = [...new Set(names)];
 
-      console.log(`[AI Tool] Found ${uniqueNames.length} unique supermarkets.`);
+      console.log(`[AI Tool] Encontrados ${uniqueNames.length} supermercados únicos. Lista:`, uniqueNames);
       return { supermarkets: uniqueNames };
     } catch (error) {
-      console.error('Error in findSupermarketsTool:', error);
+      console.error('[AI Tool] Erro dentro da ferramenta findSupermarketsTool:', error);
       // Return an empty list in case of an error to avoid breaking the flow.
       return { supermarkets: [] };
     }
