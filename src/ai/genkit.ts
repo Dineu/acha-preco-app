@@ -7,4 +7,6 @@ export const ai = genkit({
       // A apiKey é automaticamente lida da variável de ambiente GEMINI_API_KEY
     }),
   ],
+  logLevel: 'debug',
+  enableTracingAndMetrics: true,
 });
