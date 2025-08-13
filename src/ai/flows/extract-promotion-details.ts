@@ -8,8 +8,19 @@
  * - ExtractPromotionDetailsOutput - The return type for the extractPromotionDetails function.
  */
 
-import {ai} from '@/ai/genkit';
+import {genkit} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
+
+const ai = genkit({
+  plugins: [
+    googleAI({
+      // A apiKey é automaticamente lida da variável de ambiente GEMINI_API_KEY
+    }),
+  ],
+  logLevel: 'debug',
+  enableTracingAndMetrics: true,
+});
 
 const ExtractPromotionDetailsInputSchema = z.object({
   photoDataUri: z

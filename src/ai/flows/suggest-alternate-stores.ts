@@ -8,9 +8,20 @@
  * - SuggestAlternateStoresOutput - The return type for the suggestAlternateStores function.
  */
 
-import {ai} from '@/ai/genkit';
+import {genkit} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 import { findSupermarketsTool } from '@/ai/tools/findSupermercados';
+
+const ai = genkit({
+  plugins: [
+    googleAI({
+      // A apiKey é automaticamente lida da variável de ambiente GEMINI_API_KEY
+    }),
+  ],
+  logLevel: 'debug',
+  enableTracingAndMetrics: true,
+});
 
 const SuggestAlternateStoresInputSchema = z.object({
   shoppingList: z

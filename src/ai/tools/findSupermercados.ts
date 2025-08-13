@@ -5,9 +5,19 @@
  * - findSupermarketsTool - A Genkit tool that searches for supermarkets in a given city.
  */
 import { searchNearby } from '@/services/google-maps';
-import { ai } from '@/ai/genkit';
+import {genkit} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import { z } from 'zod';
 
+const ai = genkit({
+  plugins: [
+    googleAI({
+      // A apiKey é automaticamente lida da variável de ambiente GEMINI_API_KEY
+    }),
+  ],
+  logLevel: 'debug',
+  enableTracingAndMetrics: true,
+});
 
 export const findSupermarketsTool = ai.defineTool(
   {
