@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Map, PlusCircle } from 'lucide-react';
+import { Home, Map, PlusCircle, FlaskConical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -43,6 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const menuItems = [
     { href: '/dashboard', label: 'Minhas Listas', icon: Home },
     { href: '/dashboard/map', label: 'Mapa de Mercados', icon: Map },
+    { href: '/dashboard/test-ai', label: 'Testar IA', icon: FlaskConical },
   ];
 
   const handleCreateList = (e: React.FormEvent) => {

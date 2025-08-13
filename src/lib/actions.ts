@@ -23,9 +23,9 @@ export async function suggestMissingItems(input: SuggestMissingItemsInput): Prom
     const result = await suggestMissingItemsFlow(input);
     console.log('[Action] suggestMissingItems concluído com sucesso. Resultado:', result);
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Action] Erro em suggestMissingItems:', error);
-    throw new Error('Falha ao obter sugestões de itens.');
+    throw new Error(`Falha ao obter sugestões de itens: ${error.message}`);
   }
 }
 
@@ -35,9 +35,9 @@ export async function suggestAlternateStores(input: SuggestAlternateStoresInput)
     const result = await suggestAlternateStoresFlow(input);
     console.log('[Action] suggestAlternateStores concluído com sucesso. Resultado:', result);
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Action] Erro em suggestAlternateStores:', error);
-    throw new Error('Falha ao obter sugestões de lojas.');
+    throw new Error(`Falha ao obter sugestões de lojas: ${error.message}`);
   }
 }
 
@@ -48,8 +48,8 @@ export async function extractPromotionDetails(input: ExtractPromotionDetailsInpu
     const result = await extractPromotionDetailsFlow(input);
     console.log('[Action] extractPromotionDetails concluído com sucesso. Resultado:', result);
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Action] Erro em extractPromotionDetails:', error);
-    throw new Error('Falha ao extrair detalhes da promoção.');
+    throw new Error(`Falha ao extrair detalhes da promoção: ${error.message}`);
   }
 }
