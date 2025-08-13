@@ -18,8 +18,18 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       </g>
       
       {/* Cifrão dentro da Lupa */}
-      <g className="stroke-primary-foreground" strokeWidth="1.5" transform="translate(8, 8) scale(0.45)">
-         <text x="5" y="15" className="font-bold text-lg" fill="currentColor" stroke="none">R$</text>
+      <g className="stroke-primary-foreground" strokeWidth="1.5">
+         <text 
+            x="10.5" 
+            y="11.5" 
+            textAnchor="middle" 
+            dominantBaseline="middle" 
+            className="font-bold text-lg" 
+            fill="currentColor" 
+            stroke="none"
+        >
+            R$
+        </text>
       </g>
     </svg>
   );
