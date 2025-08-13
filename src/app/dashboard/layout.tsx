@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -91,8 +92,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <SidebarTrigger className="sm:hidden" />
+
           <div className="flex flex-1 items-center justify-end gap-2">
              <Dialog open={isNewListDialogOpen} onOpenChange={setIsNewListDialogOpen}>
               <DialogTrigger asChild>
