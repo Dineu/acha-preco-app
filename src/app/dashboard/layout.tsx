@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Map, PlusCircle, FlaskConical } from 'lucide-react';
+import { Home, Map, PlusCircle, FlaskConical, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -29,19 +29,24 @@ import {
 } from '@/components/ui/sidebar';
 import { UserNav } from '@/components/user-nav';
 import { Logo } from '@/components/logo';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 
 /**
  * @fileoverview Este é o layout principal para todas as páginas do dashboard.
  * Ele fornece a estrutura de navegação persistente, como a barra lateral e o cabeçalho.
  * O conteúdo de cada página específica do dashboard é renderizado através do {children}.
+ * Ele também protege as rotas, redirecionando usuários não logados para a página de login.
  */
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Estado para controlar a abertura do diálogo de criação de nova lista.
   const [isNewListDialogOpen, setIsNewListDialogOpen] = useState(false);
@@ -55,6 +60,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: '/dashboard/map', label: 'Mapa de Mercados', icon: Map },
     { href: '/dashboard/test-ai', label: 'Testar IA', icon: FlaskConical },
   ];
+
+  /**
+   * Efeito para verificar o estado de autenticação do usuário.
+   * Se o usuário não estiver logado, ele é redirecionado para a página de login.
+   */
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (!currentUser) {
+        // Se não houver usuário, redireciona para a página de login.
+        router.push('/');
+      } else {
+        setUser(currentUser);
+        setLoading(false);
+      }
+    });
+
+    // Limpa o listener quando o componente é desmontado.
+    return () => unsubscribe();
+  }, [router]);
+
 
   /**
    * Manipula a submissão do formulário para criar uma nova lista.
@@ -76,6 +101,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // Idealmente, o usuário seria redirecionado para a página da nova lista.
     // router.push('/dashboard/lists/new-list-id');
   };
+
+  // Enquanto verifica a autenticação, exibe uma tela de carregamento.
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
 
   return (
