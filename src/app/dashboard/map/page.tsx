@@ -137,7 +137,9 @@ function MapPageContent() {
         "MonteKali Supermercado em Indaiatuba",
         "Cato Supermercados em Indaiatuba",
         "Pistoni Supermercados em Indaiatuba",
-        "Revolução Supermercado em Indaiatuba"
+        "Revolução Supermercado em Indaiatuba",
+        "OBA Hortifruti em Indaiatuba",
+        "Frutal Supermercado em Indaiatuba"
     ];
   
     try {
@@ -360,5 +362,7 @@ export default function MapPage() {
     </Card>
   );
 }
+
+    
 
     
