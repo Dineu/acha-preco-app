@@ -6,13 +6,14 @@ import { notFound } from 'next/navigation';
 // This ensures data fetching logic is clearly separated.
 async function getList(id: string) {
   // In a real app, this would be a database call.
-  return mockShoppingLists.find((l) => l.id === id);
+  // The find method is synchronous, so we can wrap it in a resolved promise
+  // to ensure the function is always async.
+  return Promise.resolve(mockShoppingLists.find((l) => l.id === id));
 }
 
 export default async function ShoppingListPage({ params }: { params: { id: string } }) {
   // Await the data fetching to ensure params are resolved correctly.
-  const { id } = params;
-  const list = await getList(id);
+  const list = await getList(params.id);
 
   if (!list) {
     notFound();
