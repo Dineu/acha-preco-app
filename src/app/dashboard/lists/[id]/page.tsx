@@ -2,8 +2,16 @@ import { mockShoppingLists } from '@/lib/data';
 import ShoppingListClientPage from '@/components/shopping-list-client-page';
 import { notFound } from 'next/navigation';
 
+// Helper function to fetch the list.
+// This ensures data fetching logic is clearly separated.
+async function getList(id: string) {
+  // In a real app, this would be a database call.
+  return mockShoppingLists.find((l) => l.id === id);
+}
+
 export default async function ShoppingListPage({ params }: { params: { id: string } }) {
-  const list = mockShoppingLists.find((l) => l.id === params.id);
+  // Await the data fetching to ensure params are resolved correctly.
+  const list = await getList(params.id);
 
   if (!list) {
     notFound();
