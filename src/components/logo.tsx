@@ -18,7 +18,7 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       </g>
       
       {/* Carrinho de Compras (baseado no desenho) */}
-      <g className="stroke-primary-foreground" strokeWidth="2" transform="translate(5, 6) scale(0.65)">
+      <g className="stroke-primary-foreground" strokeWidth="2" transform="translate(5.5, 6.5) scale(0.65)">
         <path d="M6 14.5h11l-1.5-6h-9z" />
         <path d="M6 8.5v-2a1 1 0 0 1 1-1h1" />
         <circle cx="7" cy="18.5" r="1" />
