@@ -11,9 +11,9 @@ async function getList(id: string) {
   return Promise.resolve(mockShoppingLists.find((l) => l.id === id));
 }
 
-export default async function ShoppingListPage({ params }: { params: { id: string } }) {
+export default async function ShoppingListPage({ params: { id } }: { params: { id: string } }) {
   // Await the data fetching to ensure params are resolved correctly.
-  const list = await getList(params.id);
+  const list = await getList(id);
 
   if (!list) {
     notFound();
