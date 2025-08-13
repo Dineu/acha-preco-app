@@ -11,7 +11,8 @@ async function getList(id: string) {
 
 export default async function ShoppingListPage({ params }: { params: { id: string } }) {
   // Await the data fetching to ensure params are resolved correctly.
-  const list = await getList(params.id);
+  const { id } = params;
+  const list = await getList(id);
 
   if (!list) {
     notFound();
