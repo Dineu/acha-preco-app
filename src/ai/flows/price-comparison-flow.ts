@@ -47,10 +47,10 @@ const findSupermarketsTool = ai.defineTool(
       const uniqueNames = [...new Set(names)];
 
       console.log(`[AI Tool] Encontrados ${uniqueNames.length} supermercados únicos. Lista:`, uniqueNames);
-      return { supermarkets: uniqueNames };
+      return { supermercados: uniqueNames };
     } catch (error) {
       console.error('[AI Tool] Erro dentro da ferramenta findSupermarketsTool:', error);
-      return { supermarkets: [] };
+      return { supermercados: [] };
     }
   }
 );
