@@ -117,9 +117,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <div className="flex items-center gap-2">
-            <Logo className="h-8 w-8" />
-            <span className="text-lg font-semibold font-headline">Acha Preço</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Logo className="h-8 w-8" />
+              <span className="text-lg font-semibold font-headline">Acha Preço</span>
+            </div>
+            <SidebarTrigger />
           </div>
         </SidebarHeader>
         <SidebarContent>
