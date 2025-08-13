@@ -121,6 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Logo className="h-8 w-8" />
             <span className="text-lg font-semibold font-headline">Acha Preço</span>
           </div>
+          <SidebarTrigger />
         </SidebarHeader>
         <SidebarContent>
           {/* Renderiza o menu de navegação. */}
@@ -142,60 +143,59 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </SidebarContent>
       </Sidebar>
 
-      {/* SidebarInset envolve o conteúdo principal da página. */}
-      <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          {/* O SidebarTrigger é o botão para abrir/fechar a sidebar em dispositivos móveis. */}
-          <SidebarTrigger />
+      {/* O conteúdo da página atual é renderizado aqui. */}
+       <main className="flex-1 p-4 sm:px-6 sm:py-4">
+          <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-0">
+            {/* O SidebarTrigger é o botão para abrir/fechar a sidebar em dispositivos móveis. */}
+            <SidebarTrigger />
 
-          <div className="flex flex-1 items-center justify-end gap-2">
-            {/* Diálogo para criar uma nova lista. */}
-             <Dialog open={isNewListDialogOpen} onOpenChange={setIsNewListDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="h-8 gap-1">
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Nova Lista
-                  </span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <form onSubmit={handleCreateList}>
-                  <DialogHeader>
-                    <DialogTitle>Criar Nova Lista</DialogTitle>
-                    <DialogDescription>
-                      Dê um nome para sua nova lista de compras. Você poderá adicionar itens a seguir.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="name" className="text-right">
-                        Nome
-                      </Label>
-                      <Input 
-                        id="name" 
-                        value={newListName}
-                        onChange={(e) => setNewListName(e.target.value)}
-                        className="col-span-3"
-                        required
-                      />
+            <div className="flex flex-1 items-center justify-end gap-2">
+              {/* Diálogo para criar uma nova lista. */}
+              <Dialog open={isNewListDialogOpen} onOpenChange={setIsNewListDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="h-8 gap-1">
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      Nova Lista
+                    </span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <form onSubmit={handleCreateList}>
+                    <DialogHeader>
+                      <DialogTitle>Criar Nova Lista</DialogTitle>
+                      <DialogDescription>
+                        Dê um nome para sua nova lista de compras. Você poderá adicionar itens a seguir.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">
+                          Nome
+                        </Label>
+                        <Input 
+                          id="name" 
+                          value={newListName}
+                          onChange={(e) => setNewListName(e.target.value)}
+                          className="col-span-3"
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit">Criar Lista</Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+                    <DialogFooter>
+                      <Button type="submit">Criar Lista</Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
 
-            {/* Componente de navegação do usuário (avatar, menu de perfil). */}
-            <UserNav />
-          </div>
-        </header>
+              {/* Componente de navegação do usuário (avatar, menu de perfil). */}
+              <UserNav />
+            </div>
+          </header>
 
-        {/* O conteúdo da página atual é renderizado aqui. */}
-        <main className="p-4 sm:px-6 sm:py-0">{children}</main>
-      </SidebarInset>
+          <div className="mt-4">{children}</div>
+      </main>
     </SidebarProvider>
   );
 }
