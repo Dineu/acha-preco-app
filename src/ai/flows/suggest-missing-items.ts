@@ -8,7 +8,7 @@
  * - SuggestMissingItemsOutput - The return type for the suggestMissingItems function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai} from '@/ai/init';
 import {z} from 'genkit';
 
 const SuggestMissingItemsInputSchema = z.object({

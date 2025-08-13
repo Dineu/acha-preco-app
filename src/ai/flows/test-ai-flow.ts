@@ -7,7 +7,7 @@
  * - TestAiOutput - The return type for the testAi function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai} from '@/ai/init';
 import {z} from 'genkit';
 
 

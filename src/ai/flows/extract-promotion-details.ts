@@ -8,7 +8,7 @@
  * - ExtractPromotionDetailsOutput - The return type for the extractPromotionDetails function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai} from '@/ai/init';
 import {z} from 'genkit';
 
 const ExtractPromotionDetailsInputSchema = z.object({
