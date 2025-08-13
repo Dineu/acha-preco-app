@@ -1,7 +1,9 @@
+'use server';
+
 /**
  * @fileOverview A service for interacting with the Google Maps API.
  */
-import { Client, Place, PlaceInputType } from '@googlemaps/google-maps-services-js';
+import { Client, Place } from '@googlemaps/google-maps-services-js';
 
 const client = new Client({});
 
@@ -42,8 +44,9 @@ async function getCoordinatesForCity(city: string): Promise<{ lat: number; lng: 
 
 
 /**
- * Searches for places nearby a given location.
- * @param query The text query to search for (e.g., "supermarket").
+ * Searches for places nearby a given location using a predefined list of supermarket names.
+ * This approach is more reliable than a generic query.
+ * @param query A generic query (e.g., "supermercado em Indaiatuba"). The function will ignore this and use its internal list.
  * @param location The city name to search in.
  * @returns A list of places found.
  */
@@ -54,34 +57,59 @@ export async function searchNearby(query: string, location: string): Promise<Par
   try {
      const cityCenter = await getCoordinatesForCity(location);
 
-    const requestParams = {
-        query: query,
-        location: cityCenter,
-        radius: 20000, // Search within a 20km radius of the city center
-        key: apiKey,
-        language: 'pt-BR',
-      };
+     const supermarketQueries = [
+        "Sumerbol em Indaiatuba",
+        "Pague Menos em Indaiatuba",
+        "GoodBom em Indaiatuba",
+        "Covabra em Indaiatuba",
+        "Sonda em Indaiatuba",
+        "Atacadão em Indaiatuba",
+        "Assaí Atacadista em Indaiatuba",
+        "Roldão Atacadista em Indaiatuba",
+        "Pão de Açúcar em Indaiatuba",
+        "OBA Hortifruti em Indaiatuba",
+        // Add smaller or local markets as well
+        "MonteKali Supermercado em Indaiatuba",
+        "Cato Supermercados em Indaiatuba",
+        "Pistoni Supermercados em Indaiatuba",
+        "Revolução Supermercado em Indaiatuba",
+        "Frutal Supermercado em Indaiatuba"
+    ];
 
-    console.log('[Service/GoogleMaps] Parâmetros da requisição para textSearch:', requestParams);
-
-    const response = await client.textSearch({
-      params: requestParams,
+    const searchPromises = supermarketQueries.map(specificQuery => {
+        const requestParams = {
+            query: specificQuery,
+            location: cityCenter,
+            radius: 20000, // Search within a 20km radius
+            key: apiKey,
+            language: 'pt-BR',
+        };
+        console.log(`[Service/GoogleMaps] Executando busca por: "${specificQuery}"`);
+        return client.textSearch({ params: requestParams });
     });
 
-    if (response.data.results) {
-      console.log(`[Service/GoogleMaps] A API retornou ${response.data.results.length} resultados.`);
-      // Return a simplified list of places
-      const places = response.data.results.map(place => ({
-        name: place.name,
-        vicinity: place.vicinity,
-        rating: place.rating,
-        place_id: place.place_id,
-      }));
-       console.log('[Service/GoogleMaps] Resultados processados:', places.map(p => p.name));
-       return places;
-    }
-    console.warn('[Service/GoogleMaps] A busca não retornou resultados.');
-    return [];
+    const searchResults = await Promise.all(searchPromises);
+    
+    const allPlaces = searchResults.flatMap(result => result.data.results);
+    const uniquePlaces = new Map<string, Partial<Place>>();
+
+    // Filter and deduplicate results
+    allPlaces.forEach((place: Place) => {
+        if (place.place_id && place.name && !uniquePlaces.has(place.place_id)) {
+            uniquePlaces.set(place.place_id, {
+                name: place.name,
+                vicinity: place.vicinity,
+                rating: place.rating,
+                place_id: place.place_id,
+            });
+        }
+    });
+
+    const places = Array.from(uniquePlaces.values());
+    console.log(`[Service/GoogleMaps] A API retornou ${places.length} resultados únicos.`);
+    console.log('[Service/GoogleMaps] Resultados processados:', places.map(p => p.name));
+    return places;
+
   } catch (error) {
     console.error('[Service/GoogleMaps] Erro em searchNearby:', error);
     return [];
