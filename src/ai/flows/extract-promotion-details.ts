@@ -12,6 +12,8 @@
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
+import { PromotionItemSchema } from '@/lib/types';
+
 
 const ai = genkit({
   plugins: [
@@ -31,12 +33,6 @@ const ExtractPromotionDetailsInputSchema = z.object({
     ),
 });
 export type ExtractPromotionDetailsInput = z.infer<typeof ExtractPromotionDetailsInputSchema>;
-
-export const PromotionItemSchema = z.object({
-  productName: z.string().describe('The full name of a product on promotion, including brand and weight/volume if available.'),
-  price: z.number().describe('The price of the product.'),
-});
-export type PromotionItem = z.infer<typeof PromotionItemSchema>;
 
 
 const ExtractPromotionDetailsOutputSchema = z.object({

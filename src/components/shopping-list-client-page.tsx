@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import type { ShoppingList, Item } from '@/lib/types';
+import type { ShoppingList, Item, PromotionItem } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -18,7 +18,7 @@ import {
   Tags,
 } from 'lucide-react';
 import { suggestMissingItems, suggestAlternateStores, extractPromotionDetails, comparePrices } from '@/lib/actions';
-import type { ExtractPromotionDetailsOutput, PromotionItem } from '@/ai/flows/extract-promotion-details';
+import type { ExtractPromotionDetailsOutput } from '@/ai/flows/extract-promotion-details';
 import type { ComparePricesOutput } from '@/ai/flows/price-comparison-flow';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
