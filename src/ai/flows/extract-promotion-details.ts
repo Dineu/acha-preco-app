@@ -15,7 +15,7 @@ import {z} from 'genkit';
 const ai = genkit({
   plugins: [
     googleAI({
-      // A apiKey é automaticamente lida da variável de ambiente GEMINI_API_KEY
+      apiKey: process.env.GEMINI_API_KEY,
     }),
   ],
   logLevel: 'debug',
