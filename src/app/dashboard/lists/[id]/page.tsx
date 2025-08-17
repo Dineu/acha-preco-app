@@ -1,5 +1,6 @@
 import { mockShoppingLists } from '@/lib/data';
 import ShoppingListClientPage from '@/components/shopping-list-client-page';
+import type { ShoppingList } from '@/lib/types';
 import { notFound } from 'next/navigation';
 
 /**
@@ -11,11 +12,11 @@ import { notFound } from 'next/navigation';
 
 // Função auxiliar para buscar a lista.
 // Em uma aplicação real, isso seria uma chamada ao banco de dados (ex: Firestore).
-async function getList(id: string) {
+async function getList(id: string): Promise<ShoppingList | null> {
   // Envolvemos a busca em uma Promise para garantir um comportamento assíncrono.
   // Isso ajuda a evitar problemas de compilação com o Next.js (Turbopack).
   return new Promise((resolve) => {
-    const list = mockShoppingLists.find((l) => l.id === id);
+    const list = mockShoppingLists.find((l) => l.id === id) || null;
     resolve(list);
   });
 }

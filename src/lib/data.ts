@@ -1,4 +1,4 @@
-import type { ShoppingList, Market } from '@/lib/types';
+import type { ShoppingList } from '@/lib/types';
 
 export const mockShoppingLists: ShoppingList[] = [
   {
