@@ -43,7 +43,7 @@ export default function TestAiPage() {
   };
   
   const handleTestSuggestStores = () => {
-    const input = { shoppingList: ['Arroz 5kg', 'Óleo de Soja', 'Leite Condensado'], currentStore: 'Pão de Açucar' };
+    const input = { shoppingList: ['Arroz 5kg', 'Óleo de Soja', 'Leite Condensado'], currentStore: 'Pão de Açucar', city: 'Indaiatuba' };
     runFlow('suggestAlternateStores', () => suggestAlternateStores(input));
   };
 

@@ -20,6 +20,13 @@ import {
     ComparePricesInput,
     ComparePricesOutput,
 } from '@/ai/flows/price-comparison-flow';
+import {
+  getShoppingListsByUser as getShoppingListsByUserSvc,
+  createShoppingList as createShoppingListSvc,
+  updateShoppingList as updateShoppingListSvc,
+  deleteShoppingList as deleteShoppingListSvc,
+} from '@/lib/shopping-list-service';
+import type { ShoppingList } from '@/lib/types';
 
 
 export async function suggestMissingItems(input: SuggestMissingItemsInput): Promise<SuggestMissingItemsOutput> {
@@ -70,4 +77,41 @@ export async function comparePrices(input: ComparePricesInput): Promise<CompareP
       console.error('[Action] Erro em comparePrices:', error);
       throw new Error(`Falha ao comparar preços: ${error.message}`);
     }
+}
+
+// Shopping list CRUD (delegates to Firestore service)
+export async function getShoppingListsByUser(userId: string): Promise<ShoppingList[]> {
+  try {
+    return await getShoppingListsByUserSvc(userId);
+  } catch (error: any) {
+    console.error('[Action] Erro em getShoppingListsByUser:', error);
+    throw new Error(error.message || 'Falha ao buscar listas');
+  }
+}
+
+export async function createShoppingList(name: string, userId: string): Promise<ShoppingList> {
+  try {
+    return await createShoppingListSvc(name, userId);
+  } catch (error: any) {
+    console.error('[Action] Erro em createShoppingList:', error);
+    throw new Error(error.message || 'Falha ao criar lista');
+  }
+}
+
+export async function updateShoppingList(updatedList: ShoppingList): Promise<void> {
+  try {
+    await updateShoppingListSvc(updatedList);
+  } catch (error: any) {
+    console.error('[Action] Erro em updateShoppingList:', error);
+    throw new Error(error.message || 'Falha ao atualizar lista');
+  }
+}
+
+export async function deleteShoppingList(listId: string): Promise<void> {
+  try {
+    await deleteShoppingListSvc(listId);
+  } catch (error: any) {
+    console.error('[Action] Erro em deleteShoppingList:', error);
+    throw new Error(error.message || 'Falha ao excluir lista');
+  }
 }

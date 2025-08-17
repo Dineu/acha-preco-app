@@ -78,12 +78,12 @@ export async function searchNearby(query: string, location: string): Promise<Par
     ];
 
     const searchPromises = supermarketQueries.map(specificQuery => {
-        const requestParams = {
+        const requestParams: any = {
             query: specificQuery,
             location: cityCenter,
             radius: 20000, // Search within a 20km radius
             key: apiKey,
-            language: 'pt-BR',
+            language: 'pt-BR' as any,
         };
         console.log(`[Service/GoogleMaps] Executando busca por: "${specificQuery}"`);
         return client.textSearch({ params: requestParams });

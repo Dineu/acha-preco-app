@@ -18,8 +18,6 @@ const ai = genkit({
       apiKey: process.env.GEMINI_API_KEY,
     }),
   ],
-  logLevel: 'debug',
-  enableTracingAndMetrics: true,
 });
 
 const SuggestMissingItemsInputSchema = z.object({
